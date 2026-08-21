@@ -7,9 +7,11 @@
   negligible signal (|r| < 0.02). Role: synthetic sanity check and hardware-interface demo
   data only — not used for training, and not evidence of real-world generalisation.
 
-- `ev_battery_degradation` has 4 positives in 10,000 rows (0.04%). `Battery_Status` is not an
-  SoH threshold — cells at 74% SoH are still labelled Healthy. Role: descriptive context
-  only; cannot support a supervised claim.
+- `ev_battery_degradation` has 4 positives in 10,000 rows (0.04%). `Battery_Status` separates
+  cleanly on SoH with no overlap (Healthy 80.17–100%, Replace Required 73.74–78.96%), so the
+  label is effectively a threshold near 80% — meaning it is derivable from `SoH_Percent` and
+  adds no independent information. With 4 positives it cannot support a supervised claim
+  regardless. Role: descriptive context for the paper's dataset section only.
 
 - NASA per-cycle CSVs store `Time` as within-cycle elapsed seconds, not an absolute
   timestamp. Confirmed across all 1779 discharge cycles in `nasa_discharge_measurements.parquet`:
