@@ -7,3 +7,4 @@ models/
 reports/figures/
 __pycache__/
 *.pyc
+*.egg-info/
