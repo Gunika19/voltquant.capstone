@@ -1,0 +1,9 @@
+.DS_Store
+._*
+.venv*/
+data/
+!data/CHECKSUMS.sha256
+models/
+reports/figures/
+__pycache__/
+*.pyc

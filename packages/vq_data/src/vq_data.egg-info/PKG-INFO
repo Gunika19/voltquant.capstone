@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: vq-data
+Version: 0.1.0
+Requires-Python: >=3.10
+Requires-Dist: vq-core
+Requires-Dist: pandas>=2.0
+Requires-Dist: matplotlib>=3.7
+Requires-Dist: pyarrow>=14

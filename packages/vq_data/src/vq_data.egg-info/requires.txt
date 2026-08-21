@@ -1,0 +1,4 @@
+vq-core
+pandas>=2.0
+matplotlib>=3.7
+pyarrow>=14
