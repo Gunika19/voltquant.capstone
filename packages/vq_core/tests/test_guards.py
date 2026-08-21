@@ -17,6 +17,12 @@ def test_soh_pct_column_raises():
         assert_no_label_leakage(df)
 
 
+def test_time_to_cutoff_column_raises():
+    df = pd.DataFrame({"voltage": [3.7, 3.6], "time_to_cutoff_s": [1500.0, 1200.0]})
+    with pytest.raises(LabelLeakageError):
+        assert_no_label_leakage(df)
+
+
 def test_clean_measurement_frame_passes():
     df = pd.DataFrame(
         {

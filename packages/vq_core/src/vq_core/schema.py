@@ -66,7 +66,22 @@ LABEL_ONLY_FEATURES = [
     "Capacity",
     "Re",
     "Rct",
+    "time_to_cutoff_s",
+    "time_to_2v7_s",
 ]
+
+# s05b_check_sampling_confound.py found time-to-2.7V correlates with soh at
+# r ~ 0.999 within a (battery, ambient_temperature, load_level) stratum (the
+# one apparent exception, B0042 at r=-0.42, is Simpson's paradox: it recorded
+# under two strata, and resolves to r=1.0 within each -- see CLAUDE.md). This
+# is not a coincidence and not an independent predictor: at fixed load
+# current, capacity discharged is current x time, so time-to-a-fixed-voltage-
+# cutoff is discharged capacity up to a constant. It is an alternative
+# measurement of the same physical quantity soh is built from, not new
+# information -- report it, never train on it. Hence it lives in
+# LABEL_ONLY_FEATURES (as time_to_cutoff_s / time_to_2v7_s) rather than as an
+# ordinary feature.
+TIME_TO_CUTOFF_IS_LABEL_DERIVED = True
 
 # nasa/metadata.csv: these 9 uids store Re/Rct as a Python complex-number
 # literal, e.g. "(0.0499-0.0293j)", instead of a plain float. This is not

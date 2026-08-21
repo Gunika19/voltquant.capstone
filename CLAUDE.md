@@ -11,6 +11,19 @@
   SoH threshold — cells at 74% SoH are still labelled Healthy. Role: descriptive context
   only; cannot support a supervised claim.
 
+- NASA: time-to-2.7V correlates with `soh` at **r ≈ 0.999** within a fixed
+  `(battery, ambient_temperature, load_level)` stratum (`s05b_check_sampling_confound.py`).
+  Physical reason: at constant load current, discharged capacity is current × time, so time to
+  reach a fixed voltage cutoff is discharged capacity up to a constant multiplier — it is an
+  *alternative measurement* of the same quantity `soh` is built from, not an independent
+  predictor. The one apparent counterexample, B0042 at r = −0.42, is **Simpson's paradox**: that
+  cell recorded under two different `(ambient_temperature, load_level)` strata, and the pooled
+  correlation flips sign purely from mixing them — within each stratum it is r = 1.0. This is a
+  reportable result for the paper's deployability argument (a near-perfect, physically-grounded
+  precursor signal exists in this data) but `time_to_cutoff_s` / `time_to_2v7_s` must never enter
+  a feature matrix — see `vq_core.schema.TIME_TO_CUTOFF_IS_LABEL_DERIVED` and
+  `LABEL_ONLY_FEATURES`.
+
 ## Guardrails (vq_core.guards)
 
 - `assert_source_columns_dropped(df, source_key)` — raises if any column listed in
@@ -21,8 +34,10 @@
 - `assert_no_label_leakage(df)` — the real guard against the project's actual leakage risk.
   Raises `LabelLeakageError` naming every column in `df` that matches (case-insensitively)
   `vq_core.schema.LABEL_ONLY_FEATURES` — `capacity`, `capacity_ref`, `soh`, `soh_pct`, `re`,
-  `rct`, in any casing. These columns exist only to construct the SOH label and must never
-  appear in a model input matrix. Call this on any table about to be handed to a model.
+  `rct`, `time_to_cutoff_s`, `time_to_2v7_s`, in any casing. These columns exist only to
+  construct the SOH label (directly, or as an alternative measurement of it — see
+  `TIME_TO_CUTOFF_IS_LABEL_DERIVED` above) and must never appear in a model input matrix. Call
+  this on any table about to be handed to a model.
 - `assert_model_input_ready(df, feature_columns)` — runs `assert_no_label_leakage`, then raises
   if any of `feature_columns` is missing from `df`, and warns (doesn't raise) if `df` has columns
   present but not declared in `feature_columns`. This is the one to call right before training.
