@@ -50,3 +50,12 @@ intentionally contains `capacity`, `capacity_ref`, `soh`, and `soh_pct` (see the
 of `s04_build_discharge_table.py`). It must never be passed to a model directly; running
 `assert_no_label_leakage` against it is expected to raise. Derive a features table from it first,
 then guard that downstream table instead.
+
+## Known gotchas
+
+- `dict(some_df.groupby(...))` raises `TypeError: 'str' object is not callable`.
+  `DataFrameGroupBy.keys` is a plain string attribute (the grouping column name), not a
+  `.keys()` method — `dict()`'s mapping duck-typing sees an object with a `.keys` attribute and
+  tries to call it as if it were `Mapping.keys()`, and calling a string fails. Use a dict
+  comprehension instead: `{name: group for name, group in df.groupby(...)}`. Encountered and
+  fixed this way in `s04_build_discharge_table.py`.

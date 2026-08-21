@@ -1,0 +1,17 @@
+# Placeholder handles -- replace with real GitHub usernames once the team
+# roster is finalized. Five contributor slots, one per area of the project.
+#
+# @contributor-1  data pipeline (packages/vq_data, s01..s06 scripts)
+# @contributor-2  core guardrails and schema (packages/vq_core)
+# @contributor-3  classical ML modelling (envs/classical.txt and consumers)
+# @contributor-4  quantum ML modelling (envs/quantum.txt and consumers)
+# @contributor-5  infra: envs, Makefile, CI
+
+* @contributor-1
+
+/packages/vq_data/ @contributor-1
+/packages/vq_core/ @contributor-2
+/envs/classical.txt @contributor-3
+/envs/quantum.txt @contributor-4
+/Makefile @contributor-5
+/.github/ @contributor-5

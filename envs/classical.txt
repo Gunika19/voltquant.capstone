@@ -1,0 +1,20 @@
+# Classical ML environment (TensorFlow-based). Mutually exclusive with
+# quantum.txt -- never install both into the same environment (see Makefile
+# targets env-classical / env-quantum, which create separate venvs).
+#
+# TensorFlow's compiled ops and generated protobuf bindings are built against
+# numpy's 1.x C API and protobuf's 4.x wire format, so this file pins
+# numpy<2.0 and protobuf<5. quantum.txt's PennyLane plugin ecosystem requires
+# numpy>=2.0 and protobuf>=5 for its own compiled extensions. There is no
+# shared pin that satisfies both stacks at once -- that is the whole reason
+# this is two env files instead of one.
+numpy==1.26.4
+protobuf==4.25.3
+tensorflow==2.16.1
+scikit-learn==1.5.2
+pandas==2.3.3
+matplotlib==3.11.1
+pyarrow==25.0.1
+pytest==9.1.1
+-e ./packages/vq_core
+-e ./packages/vq_data
