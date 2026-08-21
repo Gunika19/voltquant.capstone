@@ -18,6 +18,10 @@ Splitting is grouped by battery_id (a cell's cycles never span two splits)
 and stratified by whether the cell ever reaches runaway, so that a cell
 population this small (23 cells) can't accidentally leave a split with zero
 positives.
+
+Time is excluded from the feature list -- it duplicates time_elapsed exactly
+(see CLAUDE.md). The surviving features are also scanned pairwise for
+|Pearson r| > 0.99 and any hits are reported (not dropped) for review.
 """
 
 from __future__ import annotations
@@ -52,6 +56,13 @@ IDENTIFIER_COLUMNS = {
     "uid",
     "test_id",
     "filename",
+    # Time is byte-for-byte identical to time_elapsed on every row of every
+    # cycle: NASA's per-cycle CSVs store Time as within-cycle elapsed
+    # seconds already starting at 0.0 (confirmed across all 1779 discharge
+    # cycles -- see CLAUDE.md), so s05's time_elapsed = Time - Time.first()
+    # is a no-op. Excluded here to avoid double-counting the same signal;
+    # time_elapsed is kept as the physically-named survivor.
+    "Time",
 }
 
 # Label and label-derived columns, on top of the capacity*/time_to_* prefix
@@ -61,6 +72,8 @@ LABEL_DERIVED_COLUMNS = {"label", "soh", "soh_pct", "cycles_to_crossing"}
 TEST_FRACTION = 0.30
 VAL_FRACTION = 0.15
 SPLIT_SEED = 42
+
+CORRELATION_THRESHOLD = 0.99
 
 
 def section(title: str) -> None:
@@ -83,6 +96,29 @@ def detect_feature_columns(df: pd.DataFrame) -> list[str]:
     for column in features:
         print(f"  {column}")
     return features
+
+
+def report_feature_correlations(df: pd.DataFrame, feature_columns: list[str]) -> None:
+    """Report only -- does not drop anything. Row-level Pearson correlation
+    (measurement rows, not windows) between every pair of surviving feature
+    columns, flagging exact-duplicate or near-duplicate pairs (|r| > 0.99)
+    for a human to decide what -- if anything -- to do about."""
+    section(f"Feature correlation scan (|Pearson r| > {CORRELATION_THRESHOLD})")
+    corr = df[feature_columns].corr()
+
+    pairs = []
+    for i, column_a in enumerate(feature_columns):
+        for column_b in feature_columns[i + 1 :]:
+            r = corr.loc[column_a, column_b]
+            if pd.notna(r) and abs(r) > CORRELATION_THRESHOLD:
+                pairs.append((column_a, column_b, r))
+
+    if not pairs:
+        print("no feature pair exceeds the threshold.")
+        return
+
+    for column_a, column_b, r in sorted(pairs, key=lambda pair: -abs(pair[2])):
+        print(f"  {column_a} <-> {column_b}: r = {r:.6f}")
 
 
 def build_windows(df: pd.DataFrame, feature_columns: list[str]) -> tuple[pd.DataFrame, list[np.ndarray]]:
@@ -170,6 +206,7 @@ def main() -> None:
 
     df = pd.read_parquet(INPUT_PATH)
     feature_columns = detect_feature_columns(df)
+    report_feature_correlations(df, feature_columns)
 
     manifest, window_arrays = build_windows(df, feature_columns)
 

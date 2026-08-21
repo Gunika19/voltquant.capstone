@@ -11,6 +11,17 @@
   SoH threshold — cells at 74% SoH are still labelled Healthy. Role: descriptive context
   only; cannot support a supervised claim.
 
+- NASA per-cycle CSVs store `Time` as within-cycle elapsed seconds, not an absolute
+  timestamp. Confirmed across all 1779 discharge cycles in `nasa_discharge_measurements.parquet`:
+  the first `Time` value of every single cycle is exactly `0.0` (verified directly against a raw
+  per-cycle CSV too, e.g. `data/01_raw/nasa/data/06825.csv` starts `Time` at `0.0` and increases by
+  ~9-20s per row). The absolute wall-clock moment a cycle started lives separately, in
+  `metadata.csv`'s `start_time` (a `[year, month, day, hour, minute, second]` array). Consequence:
+  `s05_build_measurement_features.py`'s `time_elapsed = Time - Time.first()` is therefore
+  identical to `Time` on every row of every cycle — not a bug, just a redundant column, since
+  subtracting a first value that is already 0 is a no-op. `s07_build_sequences.py` excludes `Time`
+  from its feature list for this reason, keeping `time_elapsed` as the physically-named survivor.
+
 - NASA: time-to-2.7V correlates with `soh` at **r ≈ 0.999** within a fixed
   `(battery, ambient_temperature, load_level)` stratum (`s05b_check_sampling_confound.py`).
   Physical reason: at constant load current, discharged capacity is current × time, so time to
