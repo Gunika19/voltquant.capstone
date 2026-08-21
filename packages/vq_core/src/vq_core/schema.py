@@ -68,6 +68,13 @@ LABEL_ONLY_FEATURES = [
     "Rct",
     "time_to_cutoff_s",
     "time_to_2v7_s",
+    # s06_build_labels.py: the early-warning label itself and its direct
+    # derivative. cycles_to_crossing is signed distance to the sustained
+    # crossing cycle -- it encodes exactly how close a row is to the label
+    # transition, i.e. future knowledge, same reasoning as
+    # TIME_TO_CUTOFF_IS_LABEL_DERIVED above.
+    "label",
+    "cycles_to_crossing",
 ]
 
 # s05b_check_sampling_confound.py found time-to-2.7V correlates with soh at
@@ -109,3 +116,35 @@ NOMINAL_CAPACITY_AH = 2.0
 # siblings B0046-B0048 begin at 1.66-1.73 Ah. These batteries get verdict
 # NO_BASELINE in s04_build_discharge_table.py rather than a computed SOH.
 FRESH_STATE_MISSING = ["B0045"]
+
+# s06_build_labels.py: early-warning label scheme.
+#
+# 0.80 is the conventional SOH end-of-life threshold in battery prognostics
+# (paired with the 30% fade / 2 Ahr -> 1.4 Ahr rating already documented
+# above as NOMINAL_CAPACITY_AH -- 1.4/2.0 = 0.70 is the nameplate fade
+# limit, but 0.80 is the more commonly cited *early*-warning cutoff in the
+# prognostics literature, giving room for a warning window before nameplate
+# end-of-life is reached).
+SOH_EOL_THRESHOLD = 0.80
+
+# s06a_crossing_budget.py swept lead times 5/10/15/20/30/50 and found 20 gives
+# the best three-class balance among the lead times with the fewest cells
+# whose pre-crossing history is too short to fill the window -- see that
+# script's `recommend()` output.
+WARNING_LEAD_CYCLES = 20
+
+# s06a found 4 of 16 naive crossing cells (B0036/B0049/B0054/B0055) cross at
+# discharge_cycle_index=0 purely because their first valid cycle is a single
+# noisy low reading that rebounds above threshold on the very next cycle --
+# not sustained decline. Requiring the crossing to hold for 3 consecutive
+# valid cycles after the initial dip is the smallest window that resolves
+# all 4 known artifacts in this dataset (verified in s06_build_labels.py's
+# naive-vs-sustained report) without being so long it erases genuine
+# near-end-of-life crossings that have fewer than 3 cycles of history left
+# to confirm against.
+CROSSING_PERSISTENCE_CYCLES = 3
+
+# Early-warning three-class label. 2 (runaway) starts at the sustained
+# crossing cycle itself, not one cycle after -- see LABELS use in
+# s06_build_labels.py.
+LABELS = {0: "normal", 1: "warning", 2: "runaway"}
