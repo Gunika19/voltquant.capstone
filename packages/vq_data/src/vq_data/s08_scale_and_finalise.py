@@ -23,7 +23,6 @@ import json
 
 import numpy as np
 import pandas as pd
-
 from vq_core.paths import PROJECT_ROOT
 from vq_core.schema import (
     CROSSING_PERSISTENCE_CYCLES,
@@ -216,7 +215,7 @@ def main() -> None:
         pct_str = ", ".join(f"{name}={pct:.1f}%" for name, pct in info["pct"].items())
         print(f"{split}: {len(info['cells'])} cells, {info['n_windows']} windows ({pct_str})")
 
-    X_train, y_train, feature_columns = load_split("train")
+    X_train, _y_train, feature_columns = load_split("train")
     mean, std, zero_variance = fit_scaler(X_train, feature_columns)
 
     scaled = {}

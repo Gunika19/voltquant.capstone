@@ -28,7 +28,6 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-
 from vq_core.guards import assert_grouped_split
 from vq_core.paths import PROJECT_ROOT
 

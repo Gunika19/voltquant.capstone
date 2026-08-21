@@ -17,8 +17,8 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import pandas as pd
-
 from vq_core.paths import PROJECT_ROOT, RAW_NASA
+
 from vq_data.s02_verify_nasa import (
     METADATA_SEARCH_DEPTH,
     find_metadata_csv,

@@ -15,7 +15,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from vq_core.paths import PROJECT_ROOT
 
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"

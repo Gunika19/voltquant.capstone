@@ -18,10 +18,10 @@ at the end of main()).
 from __future__ import annotations
 
 import pandas as pd
-
 from vq_core.guards import assert_no_label_leakage, assert_source_columns_dropped
 from vq_core.paths import PROJECT_ROOT, RAW_EV_TR
 from vq_core.schema import DROP_ON_LOAD, TR_LABEL_BINARY
+
 from vq_data.s01_audit_raw import TR_TIMESTAMP_FORMAT
 
 OUTPUT_PATH = PROJECT_ROOT / "data" / "03_features" / "ev_charging_tr_clean.parquet"

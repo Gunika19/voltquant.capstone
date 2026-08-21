@@ -10,7 +10,6 @@ Its role is descriptive context for the paper, not training data.
 from __future__ import annotations
 
 import pandas as pd
-
 from vq_core.paths import PROJECT_ROOT, RAW_EV_DEGRADATION
 
 OUTPUT_PATH = PROJECT_ROOT / "reports" / "ev_degradation_summary.md"

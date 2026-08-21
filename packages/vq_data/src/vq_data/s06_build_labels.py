@@ -27,10 +27,14 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from vq_core.guards import assert_no_label_leakage
 from vq_core.paths import PROJECT_ROOT
-from vq_core.schema import CROSSING_PERSISTENCE_CYCLES, LABELS, SOH_EOL_THRESHOLD, WARNING_LEAD_CYCLES
+from vq_core.schema import (
+    CROSSING_PERSISTENCE_CYCLES,
+    LABELS,
+    SOH_EOL_THRESHOLD,
+    WARNING_LEAD_CYCLES,
+)
 
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 CYCLES_PATH = PROJECT_ROOT / "data" / "02_intermediate" / "nasa_discharge_cycles.parquet"

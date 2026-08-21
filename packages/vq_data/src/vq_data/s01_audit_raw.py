@@ -7,6 +7,7 @@ reports/figures/. Never writes data files.
 from __future__ import annotations
 
 import cmath
+import itertools
 import math
 
 import matplotlib
@@ -15,9 +16,13 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import pandas as pd
-
 from vq_core.paths import PROJECT_ROOT, RAW_EV_DEGRADATION, RAW_EV_TR, RAW_NASA
-from vq_core.schema import DROP_ON_LOAD, RE_RCT_COMPLEX_UIDS, TR_EVENT_FLAG_ORDER, TR_PROBABILITY_BINS
+from vq_core.schema import (
+    DROP_ON_LOAD,
+    RE_RCT_COMPLEX_UIDS,
+    TR_EVENT_FLAG_ORDER,
+    TR_PROBABILITY_BINS,
+)
 
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 
@@ -291,7 +296,7 @@ def audit_ev_charging_tr() -> pd.DataFrame:
                 f"within expected [{lo:.3f}, {hi:.3f}]"
             )
 
-    for lower, upper in zip(TR_EVENT_FLAG_ORDER, TR_EVENT_FLAG_ORDER[1:]):
+    for lower, upper in itertools.pairwise(TR_EVENT_FLAG_ORDER):
         lower_max = observed_ranges.loc[lower, "max"]
         upper_min = observed_ranges.loc[upper, "min"]
         if lower_max >= upper_min:

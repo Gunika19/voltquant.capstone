@@ -8,6 +8,7 @@ Read-only -- writes no data files.
 
 from __future__ import annotations
 
+import itertools
 import random
 import re
 from datetime import datetime
@@ -22,7 +23,6 @@ import numpy as np
 import pandas as pd
 from matplotlib.collections import LineCollection
 from matplotlib.colors import BoundaryNorm
-
 from vq_core.paths import PROJECT_ROOT, RAW_NASA
 
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
@@ -72,8 +72,15 @@ def parse_start_time(raw: str) -> datetime:
     if len(numbers) < 6:
         raise ValueError(f"expected 6 numbers in start_time, got {numbers} from {raw!r}")
     year, month, day, hour, minute, second = numbers[:6]
-    microsecond = int(round((second % 1) * 1_000_000))
-    return datetime(int(year), int(month), int(day), int(hour), int(minute), int(second), microsecond)
+    # int(second) below truncates any fractional seconds -- recover them here
+    # first, or they'd be silently lost rather than rounded into microsecond.
+    microsecond = round((second % 1) * 1_000_000)
+    # start_time is a naive local timestamp -- NASA's extra_infos READMEs and
+    # metadata.csv record no timezone anywhere in this dataset, so attaching
+    # one (e.g. UTC) would assert precision the source doesn't have. Used
+    # only for within-battery chronological ordering, never absolute time
+    # arithmetic, so naive is correct here, not an oversight.
+    return datetime(int(year), int(month), int(day), int(hour), int(minute), int(second), microsecond)  # noqa: DTZ001
 
 
 def is_present(series: pd.Series) -> pd.Series:
@@ -190,7 +197,7 @@ def plot_capacity_vs_cycle(discharge: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(9, 6))
     temps = sorted(discharge["ambient_temperature"].unique())
     cmap = plt.get_cmap("viridis", len(temps))
-    boundaries = [temps[0] - 0.5] + [(a + b) / 2 for a, b in zip(temps, temps[1:])] + [temps[-1] + 0.5]
+    boundaries = [temps[0] - 0.5] + [(a + b) / 2 for a, b in itertools.pairwise(temps)] + [temps[-1] + 0.5]
     norm = BoundaryNorm(boundaries=boundaries, ncolors=len(temps))
 
     for _, group in discharge.groupby("battery_id"):

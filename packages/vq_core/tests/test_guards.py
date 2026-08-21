@@ -1,7 +1,10 @@
 import pandas as pd
 import pytest
-
-from vq_core.guards import LabelLeakageError, assert_grouped_split, assert_no_label_leakage
+from vq_core.guards import (
+    LabelLeakageError,
+    assert_grouped_split,
+    assert_no_label_leakage,
+)
 
 
 @pytest.mark.parametrize("column_name", ["capacity", "Capacity"])

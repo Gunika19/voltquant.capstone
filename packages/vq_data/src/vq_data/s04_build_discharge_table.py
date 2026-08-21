@@ -35,10 +35,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from vq_core.paths import PROJECT_ROOT, RAW_NASA
 from vq_core.schema import FRESH_STATE_MISSING, NOMINAL_CAPACITY_AH
-from vq_data.s02_verify_nasa import METADATA_SEARCH_DEPTH, find_metadata_csv, find_per_cycle_dir, parse_start_time
+
+from vq_data.s02_verify_nasa import (
+    METADATA_SEARCH_DEPTH,
+    find_metadata_csv,
+    find_per_cycle_dir,
+    parse_start_time,
+)
 from vq_data.s03_diagnose_capacity_trend import (
     STRONG_NEGATIVE_THRESHOLD,
     extract_load_current,
@@ -208,7 +213,7 @@ def step2_rediagnose(discharge: pd.DataFrame, verdicts_before: dict) -> tuple[pd
 
     all_battery_ids = discharge["battery_id"].unique()
     insufficient = sorted(
-        set(valid_counts[valid_counts < MIN_VALID_CYCLES].index) | set(b for b in all_battery_ids if b not in valid_counts.index)
+        set(valid_counts[valid_counts < MIN_VALID_CYCLES].index) | {b for b in all_battery_ids if b not in valid_counts.index}
     )
     print(f"batteries excluded as INSUFFICIENT (< {MIN_VALID_CYCLES} valid discharge cycles): {insufficient}")
 
