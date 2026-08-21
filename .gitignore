@@ -8,3 +8,4 @@ reports/figures/
 __pycache__/
 *.pyc
 *.egg-info/
+.claude/settings.local.json

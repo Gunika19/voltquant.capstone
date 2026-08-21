@@ -6,6 +6,9 @@ reports/figures/. Never writes data files.
 
 from __future__ import annotations
 
+import cmath
+import math
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -14,7 +17,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from vq_core.paths import PROJECT_ROOT, RAW_EV_DEGRADATION, RAW_EV_TR, RAW_NASA
-from vq_core.schema import DROP_ON_LOAD, TR_EVENT_FLAG_ORDER, TR_PROBABILITY_BINS
+from vq_core.schema import DROP_ON_LOAD, RE_RCT_COMPLEX_UIDS, TR_EVENT_FLAG_ORDER, TR_PROBABILITY_BINS
 
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 
@@ -94,29 +97,51 @@ def investigate_object_dtype_columns(df: pd.DataFrame, columns: list[str]) -> No
     for column in columns:
         raw = df[column]
         coerced = pd.to_numeric(raw, errors="coerce")
-        offending = raw[coerced.isna() & raw.notna()].value_counts()
+        offending_mask = coerced.isna() & raw.notna()
+        offending_rows = df.loc[offending_mask, ["uid", "battery_id", column]]
 
-        if offending.empty:
+        if offending_rows.empty:
             print(f"{column}: every non-null raw value parses as numeric -- object dtype must come from NaN mixing with real values")
             continue
 
-        non_placeholder = offending.drop(labels=["[]"], errors="ignore")
-        if non_placeholder.empty:
+        is_placeholder = offending_rows[column].astype(str).str.strip() == "[]"
+        is_known_complex = offending_rows["uid"].isin(RE_RCT_COMPLEX_UIDS)
+        placeholder_rows = offending_rows[is_placeholder]
+        complex_rows = offending_rows[is_known_complex & ~is_placeholder]
+        unknown_rows = offending_rows[~is_placeholder & ~is_known_complex]
+
+        if not placeholder_rows.empty:
             print(
-                f"{column}: object dtype is caused ONLY by the literal placeholder string '[]' "
-                f"used for missing values ({int(offending.get('[]', 0))} occurrence(s)) -- "
-                f"no other non-numeric token exists."
+                f"{column}: {len(placeholder_rows)} occurrence(s) of the literal placeholder "
+                f"string '[]' -- a legitimate missing marker, not a parsing problem."
             )
-        else:
+
+        if not complex_rows.empty:
             print(
-                f"[NOTICE] {column}: {len(non_placeholder)} distinct non-numeric token(s) found "
-                f"besides any '[]' placeholder. pd.to_numeric(errors='coerce') SILENTLY turns these "
-                f"into NaN, which would misreport a present measurement as missing:"
+                f"{column}: {len(complex_rows)} row(s) store a genuine complex value -- impedance "
+                f"is physically R + jX, so this is a VALID measurement requiring complex() parsing, "
+                f"NOT malformed data (uids listed in vq_core.schema.RE_RCT_COMPLEX_UIDS). "
+                f"pd.to_numeric(errors='coerce') cannot parse these and would silently null out a "
+                f"present measurement:"
             )
-            for value, count in non_placeholder.items():
-                print(f"    {value!r}: {count}")
-            if "[]" in offending.index:
-                print(f"    (plus '[]', {int(offending['[]'])} occurrence(s) -- that one IS a legitimate missing marker)")
+            for _, row in complex_rows.iterrows():
+                z = complex(row[column])
+                magnitude = abs(z)
+                phase_deg = math.degrees(cmath.phase(z))
+                print(
+                    f"    uid={row['uid']} battery_id={row['battery_id']}: {row[column]!r} -> "
+                    f"real={z.real:.6f}, magnitude={magnitude:.6f}, phase={phase_deg:.2f}deg"
+                )
+
+        if not unknown_rows.empty:
+            print(
+                f"[NOTICE] {column}: {len(unknown_rows)} non-numeric token(s) that are NEITHER the "
+                f"'[]' placeholder NOR in the known RE_RCT_COMPLEX_UIDS exception list -- "
+                f"pd.to_numeric(errors='coerce') would SILENTLY turn these into NaN, and this is not "
+                f"a documented exception:"
+            )
+            for _, row in unknown_rows.iterrows():
+                print(f"    uid={row['uid']} battery_id={row['battery_id']}: {row[column]!r}")
 
 
 def check_nasa_structural_presence(df: pd.DataFrame) -> None:

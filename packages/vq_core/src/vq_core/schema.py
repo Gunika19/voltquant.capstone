@@ -67,3 +67,30 @@ LABEL_ONLY_FEATURES = [
     "Re",
     "Rct",
 ]
+
+# nasa/metadata.csv: these 9 uids store Re/Rct as a Python complex-number
+# literal, e.g. "(0.0499-0.0293j)", instead of a plain float. This is not
+# malformed data -- impedance is physically a complex quantity (R + jX), and
+# these rows are genuine EIS-derived measurements on batteries B0049 and
+# B0051. pd.to_numeric(errors="coerce") cannot parse them and would silently
+# null out a present measurement; parse with Python's complex() instead
+# (verified in s01_audit_raw.py).
+RE_RCT_COMPLEX_UIDS = {4268, 4280, 4282, 4292, 4294, 4306, 4316, 4318, 4454}
+
+# NASA PCoE Li-ion battery dataset: cells are rated at 2 Ahr nominal capacity,
+# with end-of-life defined as 30% fade (2 Ahr -> 1.4 Ahr) -- stated verbatim
+# in data/01_raw/nasa/extra_infos/README_05_06_07_18.txt ("a 30% fade in
+# rated capacity (from 2Ahr to 1.4Ahr)"). B0006's observed max Capacity
+# (2.014 Ah) is consistent with this rating. Not used as the operative
+# capacity_ref (see s04_build_discharge_table.py) -- kept for the
+# four-estimator sensitivity check and as a documented limitation.
+NOMINAL_CAPACITY_AH = 2.0
+
+# nasa/metadata.csv: batteries with no fresh-state reading anywhere in their
+# recorded discharge history, so no capacity_ref (of any definition) can be
+# a beginning-of-life reference for them. B0045's first recorded discharge
+# (~1.08 Ah) equals its all-time max -- it never shows a higher reading at
+# any later cycle either -- while its same-batch, same-start-timestamp
+# siblings B0046-B0048 begin at 1.66-1.73 Ah. These batteries get verdict
+# NO_BASELINE in s04_build_discharge_table.py rather than a computed SOH.
+FRESH_STATE_MISSING = ["B0045"]

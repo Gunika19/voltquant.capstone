@@ -72,11 +72,11 @@ def prepare_discharge(df: pd.DataFrame) -> pd.DataFrame:
     return discharge.dropna(subset=["Capacity_num"]).copy()
 
 
-def pooled_spearman(discharge: pd.DataFrame) -> pd.Series:
+def pooled_spearman(discharge: pd.DataFrame, cycle_column: str = "cycle_index") -> pd.Series:
     correlations = {}
     for battery_id, group in discharge.groupby("battery_id"):
-        if group["cycle_index"].nunique() > 1:
-            correlations[battery_id] = group["cycle_index"].corr(group["Capacity_num"], method="spearman")
+        if group[cycle_column].nunique() > 1:
+            correlations[battery_id] = group[cycle_column].corr(group["Capacity_num"], method="spearman")
     return pd.Series(correlations, name="pooled_spearman").sort_values()
 
 
@@ -85,6 +85,7 @@ def stratified_spearman(
     group_keys: list[str],
     eligible_batteries: set | None = None,
     min_cycles: int = MIN_STRATUM_CYCLES,
+    cycle_column: str = "cycle_index",
 ):
     """Spearman per stratum of `group_keys`, kept only if it has >= min_cycles rows."""
     per_battery: dict[str, list[float]] = {}
@@ -93,9 +94,9 @@ def stratified_spearman(
         battery_id = key[0] if isinstance(key, tuple) else key
         if eligible_batteries is not None and battery_id not in eligible_batteries:
             continue
-        if len(group) < min_cycles or group["cycle_index"].nunique() < 2:
+        if len(group) < min_cycles or group[cycle_column].nunique() < 2:
             continue
-        r = group["cycle_index"].corr(group["Capacity_num"], method="spearman")
+        r = group[cycle_column].corr(group["Capacity_num"], method="spearman")
         per_battery.setdefault(battery_id, []).append(r)
         row = dict(zip(group_keys, key if isinstance(key, tuple) else (key,)))
         row["n_cycles"] = len(group)
