@@ -1,0 +1,17 @@
+[project]
+name = "vq-quantum"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "vq-core",
+    "pennylane>=0.30",
+    "pandas>=2.0",
+    "scikit-learn>=1.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
