@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────────
+# VoltQuant — Data Catalog
+# ─────────────────────────────────────────────────────────────
+
+# ── RAW INPUT ────────────────────────────────────────────────
+ev_raw:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/ev_battery_degradation_v1.csv
+
+# ── INTERMEDIATE STAGES ──────────────────────────────────────
+ev_dropped:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/ev_dropped.csv
+
+ev_renamed:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/ev_renamed.csv
+
+ev_no_nulls:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/ev_no_nulls.csv
+
+ev_engineered:
+  type: pandas.CSVDataset
+  filepath: data/03_primary/ev_engineered.csv
+
+ev_labeled:
+  type: pandas.CSVDataset
+  filepath: data/03_primary/ev_labeled.csv
+
+# ── FINAL OUTPUT ─────────────────────────────────────────────
+ev_cleaned:
+  type: pandas.CSVDataset
+  filepath: data/04_feature/ev_cleaned.csv
+
+  # -------- PHASE 2 --------
+
+synthetic_data:
+  type: pandas.CSVDataset
+  filepath: data/03_primary/synthetic.csv
+
+ev_phase2:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/ev_phase2.csv
