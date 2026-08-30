@@ -1,6 +1,6 @@
 # VoltQuant: A Hybrid Quantum-Classical Machine Learning Framework for Li-ion Battery State-of-Health Prognostics
 
-**Authors:** Mannat Bhatia, Gunika Sohal  
+**Authors:** Mannat Goyal, Gunika Sohal  
 **Repository:** [VoltQuant Capstone Project](https://github.com/Gunika19/voltquant.capstone)  
 **Date:** August 2026  
 
