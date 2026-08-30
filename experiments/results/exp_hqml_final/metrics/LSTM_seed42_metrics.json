@@ -49,12 +49,12 @@
     ]
   },
   "battery_metrics": {
-    "battery_accuracy": 0.0,
-    "battery_balanced_accuracy": 0.0,
-    "battery_macro_f1": 0.0,
-    "critical_class_precision": 0.0,
-    "critical_class_recall": 0.0,
-    "critical_class_f1": 0.0
+    "battery_accuracy": 1.0,
+    "battery_balanced_accuracy": 1.0,
+    "battery_macro_f1": 1.0,
+    "critical_class_precision": 1.0,
+    "critical_class_recall": 1.0,
+    "critical_class_f1": 1.0
   },
   "early_warning_metrics": {
     "per_battery": {

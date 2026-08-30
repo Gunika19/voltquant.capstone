@@ -59,25 +59,23 @@ def calculate_window_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
 
 
 def aggregate_battery_predictions(df_preds: pd.DataFrame) -> pd.DataFrame:
-    """Aggregate window-level predictions to battery-level using average probabilities.
+    """Aggregate window-level predictions to battery-level using maximum state reached.
     
     Expects df_preds to contain:
         battery_id, true_label, predicted_label,
         probability_class_0, probability_class_1, probability_class_2
     
     Returns DataFrame indexed by battery_id containing:
-        true_label: majority/representative true label of the battery cycles
-        predicted_label: class with maximum average probability
+        true_label: 2 if the battery ever reaches EOL degradation proxy, else 1 if ever warning, else 0
+        predicted_label: 2 if the model ever predicts EOL degradation proxy, else 1 if ever warning, else 0
     """
     agg = df_preds.groupby("battery_id").agg(
         avg_p0=("probability_class_0", "mean"),
         avg_p1=("probability_class_1", "mean"),
         avg_p2=("probability_class_2", "mean"),
-        true_label=("true_label", lambda x: int(x.mode()[0]) if len(x) > 0 else 0)
+        true_label=("true_label", lambda x: 2 if 2 in x.values else (1 if 1 in x.values else 0)),
+        predicted_label=("predicted_label", lambda x: 2 if 2 in x.values else (1 if 1 in x.values else 0))
     )
-    
-    probs = agg[["avg_p0", "avg_p1", "avg_p2"]].to_numpy()
-    agg["predicted_label"] = np.argmax(probs, axis=1)
     return agg.reset_index()
 
 
