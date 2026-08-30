@@ -20,7 +20,9 @@ env-quantum:
 	$(UV) pip install --python .venv-quantum/bin/python -r envs/quantum.txt
 
 test:
-	.venv-data/bin/python -m pytest packages -q
+	.venv-data/bin/python -m pytest packages/vq_core -q
+	.venv-classical/bin/python -m pytest packages/vq_classical -q
+	.venv-quantum/bin/python -m pytest packages/vq_quantum -q
 
 lint:
 	$(UV) tool run ruff check packages
