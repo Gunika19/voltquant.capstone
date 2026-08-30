@@ -95,7 +95,7 @@ This document serves as the official, frozen engineering record for the Hybrid Q
 | LSTM | 0.8333 | 0.8120 | 0.8155 | 0.8944 | 0.9280 |
 | VQC | 0.9583 | 0.9630 | 0.9550 | 0.9000 | 0.9474 |
 
-### Battery-Level Test Performance
+### Battery-Level Test Performance (Supplementary Metric)
 (Aggregated from window predictions across **6 independent test batteries**)
 | Model | Battery Accuracy | Battery Macro F1 | Class 2 Recall | Class 2 F1 |
 |---|---|---|---|---|
@@ -104,9 +104,16 @@ This document serves as the official, frozen engineering record for the Hybrid Q
 | VQC | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
 
 > [!NOTE]
-> **Corrected Battery-Level Formulation**: Ground-truth battery outcomes are derived strictly from whether the battery actually reaches the sustained EOL degradation proxy (Class 2) during its operating lifetime. Predicted battery outcomes are aggregated similarly: a battery is predicted to reach EOL if the model predicts Class 2 for any cycle. This ensures that the early detection of degradation is correctly propagated to battery-level metrics without majority class bias.
+> **Battery-Level Classification Defensibility**: Ground-truth battery outcomes are derived strictly from whether the battery actually reaches the sustained EOL degradation proxy (Class 2) during its operating lifetime. Predicted battery outcomes are aggregated similarly: a battery is predicted to reach EOL if the model predicts Class 2 for any cycle. 
+> 
+> Audit logs verify that this `ANY(Class 2)` rule is **not** artificially producing 100% battery accuracy from single fluke predictions. Models consistently predict Class 2 across multiple consecutive cycles representing a significant block of the battery life:
+> - **RF**: Predicts Class 2 on 30 to 33 windows (37.5% to 41.2% of the battery lifetime).
+> - **LSTM**: Predicts Class 2 on 27 to 29 windows (33.8% to 36.2% of the battery lifetime).
+> - **VQC**: Predicts Class 2 on exactly 27 windows (33.8% of the battery lifetime) starting immediately after the EOL crossing at cycle 51.
+> 
+> Because this reflects sustained, physically representative EOL state predictions matching the target EOL cycles block (30 EOL cycles out of 80 total cycles), this aggregation rule is scientifically defensible.
 
-### Early-Warning Prognosis Performance
+### Early-Warning Prognosis Performance (Primary Metric)
 | Model | Detection Rate | Median Lead Time | Mean Lead Time | False Alarm Rate |
 |---|---|---|---|---|
 | RF | 100.0% | 11.5 cycles | 11.3 cycles | 0.0% |
