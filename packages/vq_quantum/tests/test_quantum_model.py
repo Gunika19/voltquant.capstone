@@ -1,8 +1,10 @@
 """Unit tests for the VQC quantum model."""
 
 from __future__ import annotations
+
 import numpy as np
-from vq_quantum.model import init_weights, forward, predict
+import pytest
+from vq_quantum.model import forward, init_weights, predict
 
 
 def test_vqc_initialization():
@@ -36,3 +38,11 @@ def test_vqc_forward_and_predict():
     assert preds.shape == (4,)
     preds_list = [int(p) for p in preds]
     assert all(p in {0, 1, 2} for p in preds_list)
+
+
+def test_load_dataset_missing_data_raises_error():
+    """Assert that load_dataset raises FileNotFoundError when real data is missing."""
+    from vq_quantum.train import load_dataset
+    
+    with pytest.raises(FileNotFoundError):
+        load_dataset()

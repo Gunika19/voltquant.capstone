@@ -234,6 +234,32 @@ def main() -> None:
 
     write_scaler_json(feature_columns, mean, std, zero_variance)
     write_dataset_card(feature_columns, summary, zero_variance)
+    write_split_manifest_json(summary)
+
+
+def write_split_manifest_json(summary: dict) -> None:
+    manifest_dir = PROJECT_ROOT / "experiments" / "results" / "exp_hqml_final"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = manifest_dir / "split_manifest.json"
+    
+    payload = {
+        "seed": 42,
+        "train_battery_ids": summary["train"]["cells"],
+        "validation_battery_ids": summary["val"]["cells"],
+        "test_battery_ids": summary["test"]["cells"],
+        "sequence_counts": {
+            "train": summary["train"]["n_windows"],
+            "val": summary["val"]["n_windows"],
+            "test": summary["test"]["n_windows"],
+        },
+        "class_counts": {
+            "train": summary["train"]["counts"],
+            "val": summary["val"]["counts"],
+            "test": summary["test"]["counts"],
+        }
+    }
+    manifest_path.write_text(json.dumps(payload, indent=2))
+    print(f"wrote {manifest_path}")
 
 
 if __name__ == "__main__":

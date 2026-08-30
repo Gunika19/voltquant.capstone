@@ -5,13 +5,18 @@ Random Forest classifier, and reports metrics.
 """
 
 from __future__ import annotations
-import os
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, f1_score, recall_score, accuracy_score
 
-from vq_core.features import FULL_FEATURES
+import os
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    f1_score,
+    recall_score,
+)
 from vq_core.paths import PROJECT_ROOT
+
 from vq_classical.train import load_dataset, preprocess_data
 
 # Setup directories
@@ -31,7 +36,7 @@ def train_rf():
     X_train_flat = X_train_clean.reshape(X_train_clean.shape[0], -1)
     X_val_flat = X_val_clean.reshape(X_val_clean.shape[0], -1)
     
-    print(f"Random Forest Input Dimensions:")
+    print("Random Forest Input Dimensions:")
     print(f"  Train: {X_train_flat.shape}")
     print(f"  Val:   {X_val_flat.shape}")
     
@@ -58,7 +63,7 @@ def train_rf():
     print(f"Macro F1: {macro_f1:.4f}")
     print(f"Runaway Recall (Class 2): {runaway_recall:.4f}")
     print("\nClassification Report:")
-    print(classification_report(y_val, val_preds, target_names=["Normal", "Warning", "Runaway"], zero_division=0))
+    print(classification_report(y_val, val_preds, labels=[0, 1, 2], target_names=["Normal", "Warning", "Runaway"], zero_division=0))
     
     # Save the model using joblib (since joblib is installed in .venv-classical via sklearn dependencies)
     import joblib

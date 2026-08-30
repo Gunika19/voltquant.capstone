@@ -5,6 +5,7 @@ of battery health/runaway status.
 """
 
 from __future__ import annotations
+
 import pennylane as qml
 from pennylane import numpy as np
 

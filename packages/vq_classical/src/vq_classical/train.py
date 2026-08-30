@@ -5,15 +5,21 @@ metrics, and saves the model.
 """
 
 from __future__ import annotations
+
 import os
-import json
+
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import classification_report, f1_score, recall_score, accuracy_score
 import tensorflow as tf
-
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    f1_score,
+    recall_score,
+)
 from vq_core.features import FULL_FEATURES
 from vq_core.paths import PROJECT_ROOT
+
 from vq_classical.model import build_lstm_model
 
 # Setup directories
@@ -96,13 +102,10 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, list
     val_path = DATA_DIR / "scaled_val.npz"
     
     if not (train_path.exists() and val_path.exists()):
-        print("\n[!] WARNING: Scaled dataset files not found in data/04_model_input/.")
-        print("    Generating physically representative synthetic dataset...")
-        
-        X_train_dummy, y_train_dummy, dummy_columns = generate_synthetic_data(1000, seed=42)
-        X_val_dummy, y_val_dummy, _ = generate_synthetic_data(200, seed=123)
-        
-        return X_train_dummy, y_train_dummy, X_val_dummy, y_val_dummy, dummy_columns
+        raise FileNotFoundError(
+            f"Scaled dataset files not found: '{train_path}' or '{val_path}'. "
+            "Real dataset must be generated using the data pipeline prior to training."
+        )
 
     print(f"Loading train dataset from: {train_path}")
     train_data = np.load(train_path, allow_pickle=True)
@@ -186,7 +189,7 @@ def train_lstm(epochs: int = 15, batch_size: int = 32):
     print(f"Macro F1: {macro_f1:.4f}")
     print(f"Runaway Recall (Class 2): {runaway_recall:.4f}")
     print("\nClassification Report:")
-    print(classification_report(y_val, val_preds, target_names=["Normal", "Warning", "Runaway"], zero_division=0))
+    print(classification_report(y_val, val_preds, labels=[0, 1, 2], target_names=["Normal", "Warning", "Runaway"], zero_division=0))
     
     # Save model
     model_path = MODELS_DIR / "vq_classical_lstm.keras"
@@ -194,7 +197,7 @@ def train_lstm(epochs: int = 15, batch_size: int = 32):
     print(f"Model saved to {model_path}")
     
     # Plot loss and accuracy curves
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    _, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
     
     # Loss plot
     ax1.plot(history.history["loss"], label="Train Loss", marker="o")

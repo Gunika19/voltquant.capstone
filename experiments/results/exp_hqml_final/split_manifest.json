@@ -1,0 +1,88 @@
+{
+  "seed": 42,
+  "train_battery_ids": [
+    "B0005",
+    "B0006",
+    "B0007",
+    "B0018",
+    "B0025",
+    "B0026",
+    "B0027",
+    "B0033",
+    "B0034",
+    "B0038",
+    "B0040",
+    "B0046",
+    "B0047",
+    "B0048"
+  ],
+  "validation_battery_ids": [
+    "B0029",
+    "B0030",
+    "B0031"
+  ],
+  "test_battery_ids": [
+    "B0032",
+    "B0036",
+    "B0039",
+    "B0042",
+    "B0053",
+    "B0054"
+  ],
+  "sequence_counts": {
+    "train": 1120,
+    "val": 240,
+    "test": 480
+  },
+  "class_counts": {
+    "train": {
+      "normal": 420,
+      "warning": 280,
+      "runaway": 420
+    },
+    "val": {
+      "normal": 240,
+      "warning": 0,
+      "runaway": 0
+    },
+    "test": {
+      "normal": 180,
+      "warning": 120,
+      "runaway": 180
+    }
+  },
+  "full_features": [
+    "time_elapsed",
+    "Voltage_measured",
+    "Current_measured",
+    "Temperature_measured",
+    "Current_load",
+    "Voltage_load",
+    "dT_dt",
+    "dV_dt",
+    "dI_dt",
+    "power",
+    "roll_mean_temperature_samples",
+    "roll_std_temperature_samples",
+    "roll_mean_voltage_samples",
+    "roll_std_voltage_samples",
+    "roll_mean_temperature_60s",
+    "roll_std_temperature_60s",
+    "roll_mean_voltage_60s",
+    "roll_std_voltage_60s",
+    "temp_rise",
+    "sampling_interval_s",
+    "ambient_temperature",
+    "load_level"
+  ],
+  "vqc_features": [
+    "Voltage_measured",
+    "Current_measured",
+    "Temperature_measured",
+    "dT_dt",
+    "dV_dt",
+    "roll_std_temperature_60s",
+    "roll_std_voltage_60s",
+    "time_elapsed"
+  ]
+}
