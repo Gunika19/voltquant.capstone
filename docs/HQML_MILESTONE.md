@@ -121,6 +121,12 @@ This document serves as the official, frozen engineering record for the Hybrid Q
 ### Multi-Seed Status
 - **Multi-seed validation not executed.** Only configuration and execution logic support multi-seed iterations. Only primary seed 42 was run for this frozen baseline report.
 
+### Dataset Disjointness and Class Support Limitation
+> [!WARNING]
+> The validation split contains only non-EOL cells and therefore cannot provide validation support for Class 1/2 examples. Hyperparameter and model-selection decisions must therefore rely only on the training distribution and the predefined/frozen configuration, and the limitation must be reported explicitly.
+> 
+> The test split contains only EOL-proxy cells. Consequently, battery-level test results estimate sensitivity to EOL-proxy batteries but cannot estimate specificity against healthy batteries.
+
 ---
 
 ## 4. Result Provenance
