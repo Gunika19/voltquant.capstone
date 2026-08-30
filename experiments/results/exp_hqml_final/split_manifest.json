@@ -50,5 +50,39 @@
       "warning": 1596,
       "runaway": 958
     }
-  }
+  },
+  "full_features": [
+    "time_elapsed",
+    "Voltage_measured",
+    "Current_measured",
+    "Temperature_measured",
+    "Current_load",
+    "Voltage_load",
+    "dT_dt",
+    "dV_dt",
+    "dI_dt",
+    "power",
+    "roll_mean_temperature_samples",
+    "roll_std_temperature_samples",
+    "roll_mean_voltage_samples",
+    "roll_std_voltage_samples",
+    "roll_mean_temperature_60s",
+    "roll_std_temperature_60s",
+    "roll_mean_voltage_60s",
+    "roll_std_voltage_60s",
+    "temp_rise",
+    "sampling_interval_s",
+    "ambient_temperature",
+    "load_level"
+  ],
+  "vqc_features": [
+    "Voltage_measured",
+    "Current_measured",
+    "Temperature_measured",
+    "dT_dt",
+    "dV_dt",
+    "roll_std_temperature_60s",
+    "roll_std_voltage_60s",
+    "time_elapsed"
+  ]
 }
