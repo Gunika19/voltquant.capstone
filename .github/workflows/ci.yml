@@ -20,8 +20,11 @@ jobs:
       # the two local packages -- no NASA/EV data files are required to
       # install it or to run the tests below (packages/vq_core/tests is
       # pure unit tests against in-memory DataFrames).
-      - name: Set up data environment
-        run: make env-data
+      - name: Set up virtual environments
+        run: |
+          make env-data
+          make env-classical
+          make env-quantum
 
       - name: Run tests
         run: make test
