@@ -103,14 +103,10 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, list
     val_path = DATA_DIR / "scaled_val.npz"
     
     if not (train_path.exists() and val_path.exists()):
-        print("\n[!] WARNING: Scaled dataset files not found in data/04_model_input/.")
-        print("    Generating physically representative synthetic dataset...")
-        
-        # Increase sample sizes slightly for VQC convergence (400 train, 100 val)
-        X_train_dummy, y_train_dummy, dummy_columns = generate_synthetic_data(400, seed=42)
-        X_val_dummy, y_val_dummy, _ = generate_synthetic_data(100, seed=123)
-        
-        return X_train_dummy, y_train_dummy, X_val_dummy, y_val_dummy, dummy_columns
+        raise FileNotFoundError(
+            f"Scaled dataset files not found: '{train_path}' or '{val_path}'. "
+            "Real dataset must be generated using the data pipeline prior to training."
+        )
 
     print(f"Loading train dataset from: {train_path}")
     train_data = np.load(train_path, allow_pickle=True)

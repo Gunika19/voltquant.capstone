@@ -18,5 +18,6 @@ pytz==2026.3.post1
 scipy==1.17.1
 six==1.17.0
 tzdata==2026.3
+scikit-learn==1.5.2
 -e ./packages/vq_core
 -e ./packages/vq_data

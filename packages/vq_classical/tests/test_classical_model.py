@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 
 def test_lstm_model_build():
     """Verify that the LSTM model builds and compiles with the correct layers."""
@@ -17,3 +19,11 @@ def test_lstm_model_build():
     # Check input and output shapes
     assert model.input_shape == (None, 50, 22)
     assert model.output_shape == (None, 3)
+
+
+def test_load_dataset_missing_data_raises_error():
+    """Assert that load_dataset raises FileNotFoundError when real data is missing."""
+    from vq_classical.train import load_dataset
+    
+    with pytest.raises(FileNotFoundError):
+        load_dataset()
