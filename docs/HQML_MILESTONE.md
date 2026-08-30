@@ -95,25 +95,23 @@ This document serves as the official, frozen engineering record for the Hybrid Q
 | LSTM | 0.8333 | 0.8120 | 0.8155 | 0.8944 | 0.9280 |
 | VQC | 0.9583 | 0.9630 | 0.9550 | 0.9000 | 0.9474 |
 
-### Battery-Level Test Performance (Supplementary Metric)
+### Battery-Level Test Performance (Supplementary Metrics)
 (Aggregated from window predictions across **6 independent test batteries**)
-| Model | Battery Accuracy | Battery Macro F1 | Class 2 Recall | Class 2 F1 |
-|---|---|---|---|---|
-| RF | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
-| LSTM | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
-| VQC | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+*   **Random Forest**: **6/6 EOL-proxy batteries detected**
+*   **LSTM Benchmark**: **6/6 EOL-proxy batteries detected**
+*   **VoltQuant VQC**: **6/6 EOL-proxy batteries detected**
 
 > [!NOTE]
-> **Battery-Level Classification Defensibility**: Ground-truth battery outcomes are derived strictly from whether the battery actually reaches the sustained EOL degradation proxy (Class 2) during its operating lifetime. Predicted battery outcomes are aggregated similarly: a battery is predicted to reach EOL if the model predicts Class 2 for any cycle. 
+> **Battery-Level Detection Analysis**: 
 > 
-> Audit logs verify that this `ANY(Class 2)` rule is **not** artificially producing 100% battery accuracy from single fluke predictions. Models consistently predict Class 2 across multiple consecutive cycles representing a significant block of the battery life:
-> - **RF**: Predicts Class 2 on 30 to 33 windows (37.5% to 41.2% of the battery lifetime).
-> - **LSTM**: Predicts Class 2 on 27 to 29 windows (33.8% to 36.2% of the battery lifetime).
-> - **VQC**: Predicts Class 2 on exactly 27 windows (33.8% of the battery lifetime) starting immediately after the EOL crossing at cycle 51.
+> A battery is predicted to reach EOL if the model predicts Class 2 for any cycle. To verify that this rule is not artificially producing detection success from single cycle flukes, we audited the raw cycle predictions:
+> - **VQC**: Class 2 is predicted in consecutive, sustained blocks of exactly 9 cycles (Cycles 51-59, 61-69, and 71-79) for all 6 test batteries. It correctly maps the 10% stealthy anomalies (cycles 60 and 70) to Class 1, demonstrating high spatial stability.
+> - **LSTM**: Class 2 is predicted in consecutive blocks of 8 to 9 cycles starting after cycle 51, with minor spurious Class 2 warnings in early cycles for 2 out of 6 batteries.
+> - **RF**: Predicts Class 2 in consecutive blocks of 9 cycles, but exhibits several isolated early cycle false alarms across 5 out of 6 batteries.
 > 
-> Because this reflects sustained, physically representative EOL state predictions matching the target EOL cycles block (30 EOL cycles out of 80 total cycles), this aggregation rule is scientifically defensible.
+> Because the test set contains 0 negative (non-degrading) batteries, these metrics evaluate sensitivity only. Accuracy and Macro F1 are omitted at the battery level to prevent over-representing the results as a general battery classification benchmark.
 
-### Early-Warning Prognosis Performance (Primary Metric)
+### Early-Warning Prognosis Performance (Primary Metrics)
 | Model | Detection Rate | Median Lead Time | Mean Lead Time | False Alarm Rate |
 |---|---|---|---|---|
 | RF | 100.0% | 11.5 cycles | 11.3 cycles | 0.0% |
