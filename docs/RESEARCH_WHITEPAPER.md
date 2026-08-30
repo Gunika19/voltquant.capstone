@@ -173,3 +173,11 @@ VoltQuant VQC represents a powerful prognostic tool, pushing balanced classifica
 The next stage of project development will integrate this model's outputs with:
 1. **AES-128 Cryptographic Encryption**: Ensuring the integrity and confidentiality of telemetry frames containing `BatteryAlertSchema` metrics.
 2. **FPGA RTL Implementation**: Synthesizing the linear logic and activation blocks on an FPGA target to simulate secure edge execution.
+
+---
+
+## 8. Dataset Disjointness and Class Support Limitation
+> [!WARNING]
+> The validation split contains only non-EOL cells and therefore cannot provide validation support for Class 1/2 examples. Hyperparameter and model-selection decisions must therefore rely only on the training distribution and the predefined/frozen configuration, and the limitation must be reported explicitly.
+> 
+> The test split contains only EOL-proxy cells. Consequently, battery-level test results estimate sensitivity to EOL-proxy batteries but cannot estimate specificity against healthy batteries.
