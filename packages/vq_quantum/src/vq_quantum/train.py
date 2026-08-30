@@ -258,7 +258,7 @@ def train_vqc(epochs: int = 5, batch_size: int = 16, num_layers: int = 3, poolin
     # Final evaluation on val set
     print("\n=== Final Validation Metrics ===")
     val_preds = predict(X_val_vqc, params)
-    print(classification_report(y_val, val_preds, target_names=["Normal", "Warning", "Runaway"], zero_division=0))
+    print(classification_report(y_val, val_preds, labels=[0, 1, 2], target_names=["Normal", "Warning", "Runaway"], zero_division=0))
     
     # Save parameters
     weights_path = MODELS_DIR / "vq_quantum_weights.npz"

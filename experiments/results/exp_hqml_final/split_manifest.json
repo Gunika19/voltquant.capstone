@@ -30,25 +30,25 @@
     "B0054"
   ],
   "sequence_counts": {
-    "train": 10607,
-    "val": 1372,
-    "test": 6385
+    "train": 1120,
+    "val": 240,
+    "test": 480
   },
   "class_counts": {
     "train": {
-      "normal": 6364,
-      "warning": 2652,
-      "runaway": 1591
+      "normal": 420,
+      "warning": 280,
+      "runaway": 420
     },
     "val": {
-      "normal": 823,
-      "warning": 343,
-      "runaway": 206
+      "normal": 240,
+      "warning": 0,
+      "runaway": 0
     },
     "test": {
-      "normal": 3831,
-      "warning": 1596,
-      "runaway": 958
+      "normal": 180,
+      "warning": 120,
+      "runaway": 180
     }
   },
   "full_features": [

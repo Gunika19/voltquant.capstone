@@ -189,7 +189,7 @@ def train_lstm(epochs: int = 15, batch_size: int = 32):
     print(f"Macro F1: {macro_f1:.4f}")
     print(f"Runaway Recall (Class 2): {runaway_recall:.4f}")
     print("\nClassification Report:")
-    print(classification_report(y_val, val_preds, target_names=["Normal", "Warning", "Runaway"], zero_division=0))
+    print(classification_report(y_val, val_preds, labels=[0, 1, 2], target_names=["Normal", "Warning", "Runaway"], zero_division=0))
     
     # Save model
     model_path = MODELS_DIR / "vq_classical_lstm.keras"

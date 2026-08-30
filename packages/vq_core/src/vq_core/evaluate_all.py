@@ -6,19 +6,21 @@ runs inference, aggregates predictions, and saves final metrics.
 
 from __future__ import annotations
 
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from vq_core.config import FULL_FEATURES, PRIMARY_SEED, VQC_FEATURES
-from vq_core.evaluation import save_evaluation_results
 from vq_core.paths import PROJECT_ROOT
+from vq_core.config import PRIMARY_SEED
+from vq_core.features import FULL_FEATURES, VQC_FEATURES
+from vq_core.evaluation import save_evaluation_results
 
 DATA_DIR = PROJECT_ROOT / "data" / "04_model_input"
 MODELS_DIR = PROJECT_ROOT / "models"
 RESULTS_DIR = PROJECT_ROOT / "experiments" / "results" / "exp_hqml_final"
 
 
-def load_test_data() -> tuple[np.ndarray, np.ndarray, list[str]]:
+def load_test_data() -> tuple[np.ndarray, np.ndarray, list[str], np.ndarray, np.ndarray]:
     test_path = DATA_DIR / "scaled_test.npz"
     if not test_path.exists():
         raise FileNotFoundError(
@@ -26,10 +28,22 @@ def load_test_data() -> tuple[np.ndarray, np.ndarray, list[str]]:
             "Please run the preprocessing pipeline first."
         )
     data = np.load(test_path, allow_pickle=True)
-    return data["X"], data["y"], list(data["feature_columns"])
+    return (
+        data["X"],
+        data["y"],
+        list(data["feature_columns"]),
+        data["battery_id"],
+        data["discharge_cycle_index"]
+    )
 
 
-def evaluate_rf(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[str]) -> pd.DataFrame:
+def evaluate_rf(
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    feature_columns: list[str],
+    battery_id: np.ndarray,
+    discharge_cycle_index: np.ndarray
+) -> pd.DataFrame:
     import joblib
     model_path = MODELS_DIR / "vq_classical_rf.joblib"
     if not model_path.exists():
@@ -46,8 +60,8 @@ def evaluate_rf(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[st
     probs = rf.predict_proba(X_test_flat)
     
     df = pd.DataFrame({
-        "battery_id": "test_cell",  # In a real run, load battery_id from manifest
-        "discharge_cycle_index": np.arange(len(preds)),
+        "battery_id": battery_id,
+        "discharge_cycle_index": discharge_cycle_index,
         "true_label": y_test,
         "predicted_label": preds,
         "probability_class_0": probs[:, 0],
@@ -57,7 +71,13 @@ def evaluate_rf(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[st
     return df
 
 
-def evaluate_lstm(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[str]) -> pd.DataFrame:
+def evaluate_lstm(
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    feature_columns: list[str],
+    battery_id: np.ndarray,
+    discharge_cycle_index: np.ndarray
+) -> pd.DataFrame:
     import tensorflow as tf
     model_path = MODELS_DIR / "vq_classical_lstm.keras"
     if not model_path.exists():
@@ -73,8 +93,8 @@ def evaluate_lstm(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[
     preds = np.argmax(probs, axis=1)
     
     df = pd.DataFrame({
-        "battery_id": "test_cell",
-        "discharge_cycle_index": np.arange(len(preds)),
+        "battery_id": battery_id,
+        "discharge_cycle_index": discharge_cycle_index,
         "true_label": y_test,
         "predicted_label": preds,
         "probability_class_0": probs[:, 0],
@@ -84,7 +104,13 @@ def evaluate_lstm(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[
     return df
 
 
-def evaluate_vqc(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[str]) -> pd.DataFrame:
+def evaluate_vqc(
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    feature_columns: list[str],
+    battery_id: np.ndarray,
+    discharge_cycle_index: np.ndarray
+) -> pd.DataFrame:
     from vq_quantum.model import forward, predict
     model_path = MODELS_DIR / "vq_quantum_weights.npz"
     if not model_path.exists():
@@ -108,8 +134,8 @@ def evaluate_vqc(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[s
     probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
     
     df = pd.DataFrame({
-        "battery_id": "test_cell",
-        "discharge_cycle_index": np.arange(len(preds)),
+        "battery_id": battery_id,
+        "discharge_cycle_index": discharge_cycle_index,
         "true_label": y_test,
         "predicted_label": preds.astype(int),
         "probability_class_0": probs[:, 0],
@@ -122,7 +148,7 @@ def evaluate_vqc(X_test: np.ndarray, y_test: np.ndarray, feature_columns: list[s
 def main():
     print("=== VoltQuant Final Evaluation Runner ===")
     try:
-        X_test, y_test, feature_columns = load_test_data()
+        X_test, y_test, feature_columns, battery_id, discharge_cycle_index = load_test_data()
     except FileNotFoundError as e:
         print(f"\n[!] Evaluation Blocker: {e}")
         return
@@ -131,22 +157,25 @@ def main():
     
     # 1. Random Forest
     try:
-        df_rf = evaluate_rf(X_test, y_test, feature_columns)
+        df_rf = evaluate_rf(X_test, y_test, feature_columns, battery_id, discharge_cycle_index)
         save_evaluation_results(df_rf, RESULTS_DIR, "RF", PRIMARY_SEED)
+        print("RF test evaluation complete.")
     except Exception as e:  # noqa: BLE001
         print(f"RF evaluation failed: {e}")
         
     # 2. LSTM
     try:
-        df_lstm = evaluate_lstm(X_test, y_test, feature_columns)
+        df_lstm = evaluate_lstm(X_test, y_test, feature_columns, battery_id, discharge_cycle_index)
         save_evaluation_results(df_lstm, RESULTS_DIR, "LSTM", PRIMARY_SEED)
+        print("LSTM test evaluation complete.")
     except Exception as e:  # noqa: BLE001
         print(f"LSTM evaluation failed: {e}")
         
     # 3. VQC
     try:
-        df_vqc = evaluate_vqc(X_test, y_test, feature_columns)
+        df_vqc = evaluate_vqc(X_test, y_test, feature_columns, battery_id, discharge_cycle_index)
         save_evaluation_results(df_vqc, RESULTS_DIR, "VQC", PRIMARY_SEED)
+        print("VQC test evaluation complete.")
     except Exception as e:  # noqa: BLE001
         print(f"VQC evaluation failed: {e}")
 

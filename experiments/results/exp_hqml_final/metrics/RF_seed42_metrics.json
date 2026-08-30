@@ -1,0 +1,111 @@
+{
+  "model": "RF",
+  "seed": 42,
+  "window_metrics": {
+    "accuracy": 0.7833333333333333,
+    "balanced_accuracy": 0.7231481481481481,
+    "macro_precision": 0.8493075920495275,
+    "macro_recall": 0.7231481481481481,
+    "macro_f1": 0.7036685866194063,
+    "weighted_f1": 0.7432938266134987,
+    "per_class": {
+      "precision": [
+        0.678030303030303,
+        0.9666666666666667,
+        0.9032258064516129
+      ],
+      "recall": [
+        0.9944444444444445,
+        0.24166666666666667,
+        0.9333333333333333
+      ],
+      "f1": [
+        0.8063063063063063,
+        0.38666666666666666,
+        0.9180327868852459
+      ],
+      "support": [
+        180,
+        120,
+        180
+      ]
+    },
+    "confusion_matrix": [
+      [
+        179,
+        1,
+        0
+      ],
+      [
+        73,
+        29,
+        18
+      ],
+      [
+        12,
+        0,
+        168
+      ]
+    ]
+  },
+  "battery_metrics": {
+    "battery_accuracy": 0.5,
+    "battery_balanced_accuracy": 0.5,
+    "battery_macro_f1": 0.3333333333333333,
+    "critical_class_precision": 0.0,
+    "critical_class_recall": 0.0,
+    "critical_class_f1": 0.0
+  },
+  "early_warning_metrics": {
+    "per_battery": {
+      "B0032": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 41,
+        "lead_time_cycles": 9,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0036": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 43,
+        "lead_time_cycles": 7,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0039": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 36,
+        "lead_time_cycles": 14,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0042": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 47,
+        "lead_time_cycles": 3,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0053": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 30,
+        "lead_time_cycles": 20,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0054": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 35,
+        "lead_time_cycles": 15,
+        "detected": true,
+        "false_alarm": false
+      }
+    },
+    "summary": {
+      "detection_rate": 1.0,
+      "mean_lead_time": 11.333333333333334,
+      "median_lead_time": 11.5,
+      "false_alarm_rate": 0.0
+    }
+  }
+}

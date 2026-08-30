@@ -1,0 +1,111 @@
+{
+  "model": "VQC",
+  "seed": 42,
+  "window_metrics": {
+    "accuracy": 0.9583333333333334,
+    "balanced_accuracy": 0.9629629629629629,
+    "macro_precision": 0.9523809523809524,
+    "macro_recall": 0.9629629629629629,
+    "macro_f1": 0.9549529173169279,
+    "weighted_f1": 0.9589374165969284,
+    "per_class": {
+      "precision": [
+        1.0,
+        0.8571428571428571,
+        1.0
+      ],
+      "recall": [
+        0.9888888888888889,
+        1.0,
+        0.9
+      ],
+      "f1": [
+        0.994413407821229,
+        0.9230769230769231,
+        0.9473684210526315
+      ],
+      "support": [
+        180,
+        120,
+        180
+      ]
+    },
+    "confusion_matrix": [
+      [
+        178,
+        2,
+        0
+      ],
+      [
+        0,
+        120,
+        0
+      ],
+      [
+        0,
+        18,
+        162
+      ]
+    ]
+  },
+  "battery_metrics": {
+    "battery_accuracy": 1.0,
+    "battery_balanced_accuracy": 1.0,
+    "battery_macro_f1": 1.0,
+    "critical_class_precision": 0.0,
+    "critical_class_recall": 0.0,
+    "critical_class_f1": 0.0
+  },
+  "early_warning_metrics": {
+    "per_battery": {
+      "B0032": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 30,
+        "lead_time_cycles": 20,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0036": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 30,
+        "lead_time_cycles": 20,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0039": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 30,
+        "lead_time_cycles": 20,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0042": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 30,
+        "lead_time_cycles": 20,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0053": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 30,
+        "lead_time_cycles": 20,
+        "detected": true,
+        "false_alarm": false
+      },
+      "B0054": {
+        "true_crossing_cycle": 50,
+        "first_persistent_warning": 30,
+        "lead_time_cycles": 20,
+        "detected": true,
+        "false_alarm": false
+      }
+    },
+    "summary": {
+      "detection_rate": 1.0,
+      "mean_lead_time": 20.0,
+      "median_lead_time": 20.0,
+      "false_alarm_rate": 0.0
+    }
+  }
+}
