@@ -18,3 +18,4 @@ pyarrow==25.0.1
 pytest==9.1.1
 -e ./packages/vq_core
 -e ./packages/vq_data
+-e ./packages/vq_classical

@@ -7,7 +7,7 @@
 # plugin ecosystem here requires numpy>=2.0 and protobuf>=5, which conflicts
 # with TensorFlow's numpy<2.0 / protobuf<5 pins in classical.txt. No shared
 # pin satisfies both, hence the split.
-numpy==2.2.6
+numpy>=2.0,<2.1
 protobuf==5.29.3
 pennylane==0.39.0
 pennylane-lightning==0.39.0
@@ -18,3 +18,5 @@ pyarrow==25.0.1
 pytest==9.1.1
 -e ./packages/vq_core
 -e ./packages/vq_data
+-e ./packages/vq_quantum
+autoray<0.8.0
