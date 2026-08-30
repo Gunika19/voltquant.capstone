@@ -5,18 +5,23 @@ using PennyLane's Adam optimizer, and computes classification metrics.
 """
 
 from __future__ import annotations
+
 import os
-import json
 import time
-from pathlib import Path
+
 import matplotlib.pyplot as plt
 import pennylane as qml
 from pennylane import numpy as np
-from sklearn.metrics import classification_report, f1_score, recall_score, accuracy_score
-
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    f1_score,
+    recall_score,
+)
 from vq_core.features import VQC_FEATURES
 from vq_core.paths import PROJECT_ROOT
-from vq_quantum.model import init_weights, forward, predict, cross_entropy_loss
+
+from vq_quantum.model import cross_entropy_loss, init_weights, predict
 
 # Setup directories
 DATA_DIR = PROJECT_ROOT / "data" / "04_model_input"
@@ -222,9 +227,9 @@ def train_vqc(epochs: int = 5, batch_size: int = 16, num_layers: int = 3, poolin
             y_batch = y_shuffled[start_idx:end_idx]
             
             # Autograd updates parameters passed as positional arguments
-            def cost(w_q_arg, w_c_arg, b_c_arg):
+            def cost(w_q_arg, w_c_arg, b_c_arg, X_b=X_batch, y_b=y_batch):
                 p_dict = {"weights_q": w_q_arg, "W_class": w_c_arg, "b_class": b_c_arg}
-                return cross_entropy_loss(p_dict, X_batch, y_batch, class_weights=class_weights)
+                return cross_entropy_loss(p_dict, X_b, y_b, class_weights=class_weights)
                 
             w_q, w_c, b_c = opt.step(cost, w_q, w_c, b_c)
             batch_loss = cost(w_q, w_c, b_c)
@@ -241,7 +246,6 @@ def train_vqc(epochs: int = 5, batch_size: int = 16, num_layers: int = 3, poolin
         val_loss = cross_entropy_loss(params, X_val_vqc, y_val, class_weights=class_weights)
         
         # Metrics
-        train_metrics = evaluate(X_train_vqc, y_train, params)
         val_metrics = evaluate(X_val_vqc, y_val, params)
         
         elapsed = time.time() - t0

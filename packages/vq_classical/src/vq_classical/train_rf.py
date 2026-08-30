@@ -5,13 +5,18 @@ Random Forest classifier, and reports metrics.
 """
 
 from __future__ import annotations
-import os
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, f1_score, recall_score, accuracy_score
 
-from vq_core.features import FULL_FEATURES
+import os
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    f1_score,
+    recall_score,
+)
 from vq_core.paths import PROJECT_ROOT
+
 from vq_classical.train import load_dataset, preprocess_data
 
 # Setup directories
@@ -31,7 +36,7 @@ def train_rf():
     X_train_flat = X_train_clean.reshape(X_train_clean.shape[0], -1)
     X_val_flat = X_val_clean.reshape(X_val_clean.shape[0], -1)
     
-    print(f"Random Forest Input Dimensions:")
+    print("Random Forest Input Dimensions:")
     print(f"  Train: {X_train_flat.shape}")
     print(f"  Val:   {X_val_flat.shape}")
     

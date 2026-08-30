@@ -1,8 +1,9 @@
 """Unit tests for the VQC quantum model."""
 
 from __future__ import annotations
+
 import numpy as np
-from vq_quantum.model import init_weights, forward, predict
+from vq_quantum.model import forward, init_weights, predict
 
 
 def test_vqc_initialization():

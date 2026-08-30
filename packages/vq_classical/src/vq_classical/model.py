@@ -5,7 +5,7 @@ to classify sequences of battery telemetry into 3 classes.
 """
 
 from __future__ import annotations
-import tensorflow as tf
+
 from tensorflow.keras import layers, models
 
 

@@ -5,15 +5,21 @@ metrics, and saves the model.
 """
 
 from __future__ import annotations
+
 import os
-import json
+
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import classification_report, f1_score, recall_score, accuracy_score
 import tensorflow as tf
-
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    f1_score,
+    recall_score,
+)
 from vq_core.features import FULL_FEATURES
 from vq_core.paths import PROJECT_ROOT
+
 from vq_classical.model import build_lstm_model
 
 # Setup directories
@@ -194,7 +200,7 @@ def train_lstm(epochs: int = 15, batch_size: int = 32):
     print(f"Model saved to {model_path}")
     
     # Plot loss and accuracy curves
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    _, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
     
     # Loss plot
     ax1.plot(history.history["loss"], label="Train Loss", marker="o")
