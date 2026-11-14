@@ -9,3 +9,33 @@ __pycache__/
 *.pyc
 *.egg-info/
 .claude/settings.local.json
+
+# Exclude paper drafts and narrative explanation artifacts
+*Research_Paper*
+*Dossier*
+*Briefing*
+*Compendium*
+*presentation.html
+*.pdf
+*Implementation_Record*
+
+# Exclude raw data files and binary caches
+CALSC/data/*.zip
+CALSC/data/*.parquet
+CALSC/data/*.npz
+CALSC/data/01_raw/
+CALSC/data/02_intermediate/
+CALSC/data/03_features/
+CALSC/data/04_model_input/
+!CALSC/data/README.md
+
+# Allow CALSC publication figures to be tracked
+!CALSC/reports/figures/*.png
+
+# Local tooling & scratch
+.vscode/
+scratch/
+*.tmp
+*.log
+mpl_voltquant/
+
