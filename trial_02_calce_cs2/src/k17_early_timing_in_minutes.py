@@ -34,13 +34,18 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 BASE_DIR = SCRIPT_DIR.parent
 CANDIDATE_DATA_DIRS = [
     BASE_DIR / "data" / "04_model_input",
-    Path("data/04_model_input"),
+    Path("trial_02_calce_cs2/data/04_model_input"),
     Path("CALSC/data/04_model_input"),
+    Path("data/04_model_input"),
 ]
 DATA_DIR = next((p for p in CANDIDATE_DATA_DIRS if p.exists()), BASE_DIR / "data" / "04_model_input")
-CYCLE_TABLE_PATH = BASE_DIR / "data" / "02_intermediate" / "calce_discharge_cycles.parquet"
-if not CYCLE_TABLE_PATH.exists():
-    CYCLE_TABLE_PATH = Path("data/02_intermediate/calce_discharge_cycles.parquet")
+CYCLE_TABLE_CANDIDATES = [
+    BASE_DIR / "data" / "02_intermediate" / "calce_discharge_cycles.parquet",
+    Path("trial_02_calce_cs2/data/02_intermediate/calce_discharge_cycles.parquet"),
+    Path("CALSC/data/02_intermediate/calce_discharge_cycles.parquet"),
+    Path("data/02_intermediate/calce_discharge_cycles.parquet"),
+]
+CYCLE_TABLE_PATH = next((p for p in CYCLE_TABLE_CANDIDATES if p.exists()), BASE_DIR / "data" / "02_intermediate" / "calce_discharge_cycles.parquet")
 REPORTS_DIR = BASE_DIR / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 REPORT_PATH = REPORTS_DIR / "k17_early_timing_in_minutes_report.md"

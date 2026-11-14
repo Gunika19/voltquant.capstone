@@ -54,8 +54,9 @@ BASE_DIR = SCRIPT_DIR.parent
 
 CANDIDATE_DATA_DIRS = [
     BASE_DIR / "data" / "04_model_input",
-    Path("data/04_model_input"),
+    Path("trial_02_calce_cs2/data/04_model_input"),
     Path("CALSC/data/04_model_input"),
+    Path("data/04_model_input"),
 ]
 
 DATA_DIR = next((p for p in CANDIDATE_DATA_DIRS if p.exists()), BASE_DIR / "data" / "04_model_input")

@@ -36,8 +36,9 @@ BASE_DIR = SCRIPT_DIR.parent
 
 CANDIDATE_DATA_DIRS = [
     BASE_DIR / "data" / "02_intermediate",
-    Path("data/02_intermediate"),
+    Path("trial_02_calce_cs2/data/02_intermediate"),
     Path("CALSC/data/02_intermediate"),
+    Path("data/02_intermediate"),
 ]
 DATA_DIR = next((p for p in CANDIDATE_DATA_DIRS if p.exists()), BASE_DIR / "data" / "02_intermediate")
 CYCLE_TABLE_PATH = DATA_DIR / "calce_discharge_cycles.parquet"
