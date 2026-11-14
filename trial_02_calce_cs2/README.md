@@ -1,4 +1,4 @@
-# CALSC: Physics-Guided Hybrid Quantum-Classical Prognostics on CALCE CS2
+# Trial 2: CALCE CS2 Physics-Guided Prognostics & Early Warning Engine
 
 This folder contains the complete, out-of-distribution battery prognostics and early runaway warning software pipeline developed on the **University of Maryland CALCE CS2 cycling dataset** (LiCoO$_2$/graphite prismatic cells, continuous 0.5C discharge, 900+ cycles per cell).
 
@@ -7,8 +7,12 @@ This folder contains the complete, out-of-distribution battery prognostics and e
 ## 1. Pipeline Architecture & Directory Structure
 
 ```
-CALSC/
+trial_02_calce_cs2/
 ├── data/                      # Local data directory (raw zips excluded from git tracking)
+│   ├── 01_raw/                # Downloaded CALCE Excel files
+│   ├── 02_primary/            # Parsed discharge cycle tables
+│   ├── 03_features/           # Extracted 66 rolling window features
+│   ├── 04_model_input/        # 4-fold LOCO sequences and early timing features
 │   └── README.md              # Instructions for downloading CALCE data
 ├── reports/                   # Empirical engineering benchmark reports
 │   ├── figures/               # High-resolution publication figures (fig1 to fig6)
@@ -90,3 +94,4 @@ python src/k13_hybrid_pg_hqml.py
 # Or run a single fold test:
 python src/k13_hybrid_pg_hqml.py --fold 0
 ```
+

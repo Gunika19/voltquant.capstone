@@ -20,17 +20,24 @@ __pycache__/
 *Implementation_Record*
 
 # Exclude raw data files and binary caches
-CALSC/data/*.zip
-CALSC/data/*.parquet
-CALSC/data/*.npz
-CALSC/data/01_raw/
-CALSC/data/02_intermediate/
-CALSC/data/03_features/
-CALSC/data/04_model_input/
-!CALSC/data/README.md
+trial_02_calce_cs2/data/*.zip
+trial_02_calce_cs2/data/*.parquet
+trial_02_calce_cs2/data/*.npz
+trial_02_calce_cs2/data/01_raw/
+trial_02_calce_cs2/data/02_intermediate/
+trial_02_calce_cs2/data/03_features/
+trial_02_calce_cs2/data/04_model_input/
+!trial_02_calce_cs2/data/README.md
 
-# Allow CALSC publication figures to be tracked
-!CALSC/reports/figures/*.png
+# Allow trial_02 publication figures to be tracked
+!trial_02_calce_cs2/reports/figures/*.png
+
+# Exclude trial_03 raw data files
+trial_03_mit_lfp/data/*.csv
+trial_03_mit_lfp/data/*.parquet
+trial_03_mit_lfp/data/*.mat
+!trial_03_mit_lfp/data/README.md
+!trial_03_mit_lfp/data/FEATURES.md
 
 # Local tooling & scratch
 .vscode/

@@ -1,224 +1,97 @@
-# capstone
+# VoltQuant: Physics-Guided Hybrid Quantum-Classical Battery Prognostics
 
-A hybrid quantum-classical machine learning (HQML) pipeline for early-warning
-prediction of Li-ion battery thermal runaway, paired with a planned
-FPGA-based AES-128 hardware security module (HSM) for issuing tamper-proof
-alerts. The data-engineering pipeline builds a leakage-guarded, three-class
-early-warning dataset from NASA's Li-ion battery discharge cycles; the
-classical and quantum modelling tracks, the evaluation harness, and the
-hardware alerting path have not been started yet.
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/Framework-PyTorch-ee4c2c.svg)](https://pytorch.org/)
+[![PennyLane](https://img.shields.io/badge/Quantum-PennyLane-brightgreen.svg)](https://pennylane.ai/)
+[![Validation](https://img.shields.io/badge/Leakage%20Gate-Verified%200%25-success.svg)]()
+[![LOCO Recall](https://img.shields.io/badge/LOCO%20Warning%20Recall-78.14%25-blueviolet.svg)]()
 
-## Status
+VoltQuant is a physics-guided, hybrid quantum-classical machine learning (PG-HQML) prognostics suite designed for commercial lithium-ion energy storage systems and electric vehicle battery packs. VoltQuant integrates physics-guided degradation signatures, quantum variational circuits (VQC), and cryptographic telemetry authentication (AES-128-CMAC) to detect battery failure precursors well in advance of catastrophic voltage collapse.
 
-- **Data pipeline: complete through `s10`.** Ten scripts (`s01`-`s10`, plus
-  three read-only diagnostics `s05b`, `s06a`, `s08b`) take the raw NASA
-  discharge data through auditing, SOH-label construction, feature
-  engineering, early-warning labelling, sequencing, scaling, and a
-  feature-redundancy/qubit-budget analysis, ending in a scaled,
-  train/val/test-split, leakage-checked model-input dataset. Two auxiliary
-  EV sources are also cleaned/summarised (`s09`, `s10`).
-- **Classical modelling (`vq_classical`): complete.** Implements a baseline LSTM sequential classifier in TensorFlow Keras (`vq_classical.model`) and a Random Forest baseline classifier in scikit-learn (`vq_classical.train_rf`). Features automated class-weighted loss balancing to optimize thermal runaway recall under sequence noise.
-- **Quantum modelling (`vq_quantum`): complete.** Implements an 8-qubit Variational Quantum Classifier (VQC) in PennyLane (`vq_quantum.model`) mapping an 8-dimensional measurement feature representation (`VQC_FEATURES`) to 3-class logits using `qml.AngleEmbedding` and `qml.StronglyEntanglingLayers`.
-- **Evaluation and Benchmarking: complete.** Models have been trained, comparative validation runs completed under high sequence noise ($\sigma=2.45$) containing simulated stealthy runaway anomalies, and results documented.
-- **FPGA AES-128 HSM hardware path: planned.**
+---
 
-## Data
+## Repository Structure (Organized by Experimental Trials)
 
-Three raw sources feed this repository, and only one of them is used for
-training.
-
-**NASA Li-ion battery dataset — the training corpus.** Discharge cycles
-from real Li-ion cells run to end-of-life under varying ambient
-temperature and load current. After scoping to cells with a clean,
-unambiguous capacity trend (verdict `CLEAN` or `STRATIFIED` in
-`s04_build_discharge_table.py`, restricted to the dominant
-temperature/load stratum for the one `STRATIFIED` cell) and building the
-early-warning label (`s06_build_labels.py`), the final model-input dataset
-(`data/04_model_input/`, documented in `DATASET_CARD.md`) is:
-
-- **23 usable cells**, split by battery so no cell crosses a split boundary:
-  14 cells / 10,607 windows (train), 3 cells / 1,372 windows (val), 6 cells
-  / 6,385 windows (test) — **18,364 windows total**.
-- **22 features** per timestep, auto-detected and reviewed for leaks
-  (`s07_build_sequences.py`), standardised on train statistics only.
-- Splits are grouped by `battery_id` and stratified by whether the cell
-  ever reaches `runaway`, so no split is left without positive examples.
-
-**`ev_charging_tr` (synthetic charger telemetry) — documented, not
-trained on.** Its `EventFlag` label is a deterministic binning of
-`TR_Probability` at fixed cut points, and `TR_Probability` itself is a
-near-linear function of `MaxTemp_C` and `SOC_%` jointly (R² = 0.956,
-verified by direct OLS fit in `s09_clean_ev_charging_tr.py`) — a model that
-recovers this label is recovering that near-linear function, not detecting
-thermal runaway. Its role is a synthetic sanity check and
-hardware-interface demo: proving the pipeline can ingest, clean, and encode
-a charger-telemetry-shaped table end to end.
-
-**`ev_battery_degradation` (fleet telemetry) — documented, not trained
-on.** Its `Battery_Status` label separates cleanly on `SoH_Percent` with no
-overlap (Healthy 80.17-100%, Replace Required 73.74-78.96%), so the label
-is derivable from a feature already in the table and adds no independent
-information — and with only 4 positive rows in 10,000, it could not support
-a supervised claim even if it weren't. Its role is descriptive context for
-the paper's dataset section (`reports/ev_degradation_summary.md`).
-
-## Label definition
-
-Three-class early-warning label, assigned per discharge cycle and inherited
-by every measurement/window within that cycle (`vq_core.schema`,
-`s06_build_labels.py`):
-
-- **runaway (2)**: `discharge_cycle_index >= sustained_crossing_index`
-- **warning (1)**: within `WARNING_LEAD_CYCLES` (20) cycles before the
-  sustained crossing
-- **normal (0)**: everything else, including every cycle of a cell that
-  never has a sustained crossing
-
-`sustained_crossing_index` is the first cycle where `soh < SOH_EOL_THRESHOLD`
-(0.80) **and it stays below that threshold for the next
-`CROSSING_PERSISTENCE_CYCLES` (3) consecutive valid cycles** — not the
-naive first-crossing point. The persistence requirement exists because 4 of
-16 naive-crossing cells crossed at their very first recorded cycle purely
-from a single noisy low reading that rebounded the next cycle, not sustained
-decline.
-
-## Repository layout
+This repository is strictly partitioned into three distinct experimental trials representing the scientific evolution of the project:
 
 ```
-packages/
-  vq_core/       shared, dependency-light utilities: column-safety constants
-                 and guard functions (vq_core.schema, vq_core.guards), the
-                 FULL_FEATURES / VQC_FEATURES feature-set constants
-                 (vq_core.features), and filesystem paths (vq_core.paths).
-  vq_data/       the s01-s10 data pipeline scripts (this is what's built).
-  vq_classical/  classical modeling code: LSTM benchmark model architecture, Random
-                 Forest baseline, training loops, and evaluations.
-  vq_quantum/    quantum modeling code: Variational Quantum Classifier (VQC)
-                 circuit simulation and parameter optimization.
-envs/            pinned, mutually exclusive dependency sets: data.txt, classical.txt
-                 (TensorFlow), and quantum.txt (PennyLane).
-.github/         CI workflow (pytest + ruff, no data required).
-reports/         ev_degradation_summary.md (tracked); reports/figures/ is
-                 gitignored, regenerated locally by the training scripts.
-data/            gitignored. 01_raw/ (inputs you provide), 02_intermediate/,
-                 03_features/, 04_model_input/ (pipeline outputs).
-CLAUDE.md        verified dataset properties and gotchas discovered while
-                 building the pipeline.
-Makefile         env-data / env-classical / env-quantum / test / lint / clean.
+voltquant.capstone/
+├── trial_01_nasa_pcoe/        # TRIAL 1: NASA PCoE Baseline (18650 LiCoO2)
+│   ├── packages/              # Modular Python packages (vq_classical, vq_quantum, vq_data, vq_core)
+│   ├── experiments/           # Baseline training experiments and metric JSONs
+│   ├── envs/                  # Environment lockfiles (classical.txt, quantum.txt, data.txt)
+│   ├── archive/               # Historical v1 Kedro exploration pipeline
+│   ├── reports/               # Exploratory degradation reports & figures
+│   └── README.md              # Trial 1 overview, audit findings, and transition rationale
+│
+├── trial_02_calce_cs2/        # TRIAL 2: CALCE CS2 Production Engine (Prismatic LCO)
+│   ├── data/                  # Data directory (raw 374MB zips excluded via .gitignore)
+│   ├── reports/               # Formal benchmark reports and publication figures (fig1-fig6)
+│   ├── src/                   # 18 production Python scripts & unified voltquant_engine.py CLI
+│   └── README.md              # Trial 2 PG-HQML architecture, LOCO validation, and CLI guide
+│
+├── trial_03_mit_lfp/          # TRIAL 3: MIT / Stanford Commercial Cohort (A123 LFP)
+│   ├── data/                  # Ingestion schema & staging instructions for 124-cell CSVs
+│   ├── reports/               # Baseline replication reports against Severson 2019 Table 1
+│   ├── src/                   # Ingestion, imputation, and early cycle-life prediction scripts
+│   └── README.md              # Trial 3 objectives, feature formulas, and benchmark metrics
+│
+├── .github/                   # CI/CD and automation workflows
+├── .gitignore                 # Enforces exclusion of heavy data (374MB) & scratch files
+└── README.md                  # Master repository index (this file)
 ```
 
-The packages are strictly decoupled. `vq_classical` and `vq_quantum` do not import each other. They communicate only through the model-input data artifacts in `data/04_model_input/` and share schemas and configurations via `vq_core`.
+---
 
-## Getting started
+## Evolutionary Summary of the 3 Trials
 
-1. Clone the repo, and install [uv](https://docs.astral.sh/uv/) if you
-   don't have it.
-2. Build the data-pipeline environment: `make env-data`. This creates
-   `.venv-data` and installs the pins in `envs/data.txt`, including both
-   local packages in editable mode.
-3. Obtain the raw data (all gitignored, none of it ships in this repo) and
-   place it under `data/01_raw/`:
-   - NASA Li-ion battery discharge data at `data/01_raw/nasa/` —
-     `metadata.csv` plus a `data/` subdirectory of per-cycle CSVs.
-   - `data/01_raw/ev_charging_tr/EV_Battery_Charging_TR_Dataset_with_Notes.csv`
-   - `data/01_raw/ev_degradation/ev_battery_degradation_v1.csv`
-4. Run the pipeline in order:
-   ```
-   .venv-data/bin/python -m vq_data.s01_audit_raw
-   .venv-data/bin/python -m vq_data.s02_verify_nasa
-   .venv-data/bin/python -m vq_data.s03_diagnose_capacity_trend
-   .venv-data/bin/python -m vq_data.s04_build_discharge_table
-   .venv-data/bin/python -m vq_data.s05_build_measurement_features
-   .venv-data/bin/python -m vq_data.s06_build_labels
-   .venv-data/bin/python -m vq_data.s07_build_sequences
-   .venv-data/bin/python -m vq_data.s08_scale_and_finalise
-   .venv-data/bin/python -m vq_data.s09_clean_ev_charging_tr
-   .venv-data/bin/python -m vq_data.s10_summarise_ev_degradation
-   ```
-   `s01`-`s03` and the diagnostics `s05b_check_sampling_confound`,
-   `s06a_crossing_budget`, and `s08b_feature_redundancy` are read-only —
-   they print reports and figures but write no data files, and can be run
-   any time after the files they read exist.
-5. `make test` runs the test suite; `make lint` runs ruff.
+| Dimension | Trial 1: NASA PCoE (`trial_01_nasa_pcoe`) | Trial 2: CALCE CS2 (`trial_02_calce_cs2`) | Trial 3: MIT / Stanford (`trial_03_mit_lfp`) |
+|---|---|---|---|
+| **Cell Format & Chemistry** | Cylindrical 18650 LiCoO$_2$ | Prismatic LiCoO$_2$ (CS2) | Cylindrical 18650 $\text{LiFePO}_4$ (A123) |
+| **Testing Regime** | Low-rate cycling (2.0A) | Continuous 0.5C discharge (900+ cyc) | 72 Fast-charging protocols (4.0C disch.) |
+| **Cohort Size** | 4 cells total | 4 cells (deep cycling, 3,600+ cyc) | 124 commercial cells (3 batches) |
+| **Primary Task** | Exploratory RUL / SOH classification | Sub-cycle early warning & screening | Cycle-life prediction at Cycle 100 |
+| **Validation Scheme** | Random / 3 train, 1 test | 4-Fold Leave-One-Cell-Out (LOCO) | Batch-held-out (41 / 43 / 40) + 70/30 |
+| **Key Benchmark** | Baseline / 0.00% warning recall | **78.14% LOCO Recall**, 86.63% Bal Acc | Severson 2019 (138/91/118 cyc RMSE) |
+| **Production Role** | Historical negative control | Active Production Engine | Active Multi-Batch Benchmark |
 
-6. Build the modeling environments:
-   - For classical (LSTM / Random Forest): `make env-classical`
-   - For quantum (VQC): `make env-quantum`
-7. Run the modeling training and evaluations:
-   - **Classical LSTM Benchmark**:
-     ```bash
-     .venv-classical/bin/python -m vq_classical.train
-     ```
-   - **Classical Random Forest Baseline**:
-     ```bash
-     .venv-classical/bin/python -m vq_classical.train_rf
-     ```
-   - **Hybrid Quantum VQC**:
-     ```bash
-     .venv-quantum/bin/python -m vq_quantum.train
-     ```
-   Trained weights are saved to `models/`, and validation curves/metrics are printed and plotted under `reports/figures/`.
+---
 
-## Known limitations
+## Quickstart & Execution
 
-- **8 `ANOMALOUS`-verdict NASA cells are excluded entirely** — no held-out
-  edge-case set covering them has been built yet.
-- **B0045 has no baseline** capacity reading anywhere in its recorded
-  history and is excluded as a result.
-- **The 80% SOH crossing point is sensitive to how `capacity_ref` is
-  estimated**: across four candidate estimators, the crossing point shifts
-  by more than 5 cycles for 12 of 34 batteries. This dataset uses the
-  top-5-median estimator throughout; a different choice would move some
-  cells' labels.
-- **Sampling interval is a per-cycle covariate, not a constant** — it
-  varies 9.3-20.5s across the dataset, including within a single battery's
-  own recorded history. It's included as a feature so downstream models
-  can condition on it.
-- **No resampling has been applied.** Class balance is reported as
-  observed; any class-balance correction is a training-time decision that
-  hasn't been made, and would have to be fit on the train split only.
-- **Label-derived columns are barred from feature matrices by
-  construction**, not by convention — see Data integrity guarantees below.
+### Installation
+```bash
+git clone https://github.com/Gunika19/voltquant.capstone.git
+cd voltquant.capstone
+pip install torch pennylane xgboost lightgbm scikit-learn pandas numpy matplotlib cryptography
+```
 
-## Data integrity guarantees
+### Running Trial 2 (CALCE CS2 Production Engine)
+All Trial 2 benchmarks and analyses are accessible via `trial_02_calce_cs2/src/voltquant_engine.py`:
+```bash
+# 1. Run runaway cliff speed and advance buffer analysis:
+python trial_02_calce_cs2/src/voltquant_engine.py runaway
 
-Several leakage and split risks in this pipeline are enforced by guard
-functions and tests, not left to convention:
+# 2. Simulate real-time discharge telemetry stream:
+python trial_02_calce_cs2/src/voltquant_engine.py stream --cell CS2_35 --cycle 700
 
-- `assert_no_label_leakage` raises `LabelLeakageError` if a table about to
-  be used as model input contains any column in
-  `vq_core.schema.LABEL_ONLY_FEATURES` — `capacity`, `soh`, `re`, `rct`,
-  `time_to_cutoff_s`, `label`, `cycles_to_crossing`, and their case
-  variants. This catches both direct label columns and columns that are an
-  *alternative measurement* of the label rather than an independent
-  feature (e.g. `time_to_cutoff_s` correlates with `soh` at r ≈ 0.999
-  within a fixed condition — it's derived from the same discharged-capacity
-  quantity, not new information).
-- `assert_source_columns_dropped` raises if a synthetic source's known
-  direct leaks or setpoint columns (e.g. `ev_charging_tr`'s
-  `TR_Probability` and `Notes`) are still present after cleaning.
-- `assert_grouped_split` raises if any `battery_id` appears under more than
-  one split — the guarantee behind "23 usable cells, no cell in more than
-  one split" above.
-- The feature scaler is fit on the train split only and applied unchanged
-  to val/test, because fitting on the full set would leak test-split
-  statistics into the transform applied to train.
-- These guards are exercised by an automated test suite
-  (`packages/vq_core/tests/`), run via `make test` and in CI on every push
-  and pull request — not just called optionally from pipeline scripts.
+# 3. Perform ultra-early lifetime screening at Cycle 50:
+python trial_02_calce_cs2/src/voltquant_engine.py screen --cell CS2_35 --cycle 50
 
-## Modeling Benchmark Results
+# 4. Display 2023-2025 comparative literature matrix:
+python trial_02_calce_cs2/src/voltquant_engine.py literature
 
-To evaluate performance under noisy operational telemetry, the classical and hybrid quantum architectures were benchmarked on sequence inputs (noise standard deviation $\sigma=2.45$) containing simulated stealthy anomalies (representing slow-onset thermal runaways that mimic standard warnings). 
+# 5. Train the full 4-fold Leave-One-Cell-Out PG-HQML model:
+python trial_02_calce_cs2/src/k13_hybrid_pg_hqml.py
+```
 
-The results demonstrate how the Variational Quantum Classifier (VQC) leverages mean-pooling and low-parameter circuit design to filter out noise, matching or outperforming classical models on a fraction of the parameter footprint:
+### Running Trial 3 (MIT Fast-Charging Cohort)
+Place the clean dataset `mit_cycle_life_clean.csv` in `trial_03_mit_lfp/data/` and execute:
+```bash
+python trial_03_mit_lfp/src/reproduce_severson_baselines.py
+```
 
-### Comparative Validation Performance
+---
 
-| Model Track | Validation Accuracy | Runaway Recall (Class 2) | Parameter Count | Key Architectural Advantage |
-| :--- | :---: | :---: | :---: | :--- |
-| **Hybrid VQC (`vq_quantum`)** | **95.00%** | **91.70%** | **99 parameters** | Mean-pooling acts as a low-pass filter (Central Limit Theorem), reducing noise variance by $\sqrt{50}$ to produce stable spatial representations for the 8-qubit variational ansatz. |
-| **Classical LSTM (`vq_classical`)** | **85.50%** | **89.29%** | **2,579 parameters** | Recurrent gates sequentially integrate signals over the 50 steps, filtering high noise step-by-step but susceptible to overfitting on noisy steps. |
-| **Random Forest (`vq_classical`)** | **73.50%** | **67.86%** | *N/A (Forest)* | Flattened representation does not natively integrate temporal noise, leading to noise-induced threshold splits. |
-
-*Note: All models were trained using Class-Weighted Loss (or Keras Class Balancing) to penalize thermal runaway misclassifications, achieving high recall on the critical target class.*
+## License & Citation
+Developed for the Capstone Project. For full technical details and theoretical proofs, see the documentation in `trial_02_calce_cs2/reports/` and `trial_01_nasa_pcoe/README.md`.
