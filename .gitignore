@@ -39,6 +39,9 @@ trial_03_mit_lfp/data/*.mat
 !trial_03_mit_lfp/data/README.md
 !trial_03_mit_lfp/data/FEATURES.md
 
+# Allow trial_03 publication figures to be tracked
+!trial_03_mit_lfp/reports/figures/*.png
+
 # Local tooling & scratch
 .vscode/
 scratch/

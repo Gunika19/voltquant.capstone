@@ -25,35 +25,46 @@ Predicting the end-of-life cycle count of commercial lithium-ion cells from the 
 trial_03_mit_lfp/
 ├── data/                      # Ingested CSV files and split definitions
 │   ├── README.md              # Staging instructions and schema documentation
-│   ├── mit_cycle_life_clean.csv   # Primary clean 124-cell input (drop here)
-│   ├── mit_cycle_life_raw.csv     # Raw feature matrix (drop here)
+│   ├── HANDOFF_README.md      # Original data-engineering handoff notes
+│   ├── mit_cycle_life_clean.csv   # Primary clean 124-cell input
+│   ├── mit_cycle_life_raw.csv     # Raw feature matrix
 │   ├── mit_splits_70_30_x20.csv   # 20-seed 70/30 stratified splits
+│   ├── mit_cycle_life_processed.parquet # Ingested & imputed parquet
 │   └── FEATURES.md            # Mathematical feature formulas
 ├── reports/                   # Benchmark evaluation results & comparative plots
-│   └── severson_baseline_replication.md
-└── src/                       # Modeling and evaluation scripts
-    ├── ingest_and_preprocess.py       # Imputes b1c18 and formats arrays
-    ├── reproduce_severson_baselines.py # Exact replication of Severson 2019 Table 1
-    ├── train_mit_hybrid_pghqml.py     # Physics-Guided Hybrid Quantum-Classical model
-    └── evaluate_mit_models.py         # Comparative benchmark & error analysis
+│   ├── figures/               # High-res publication plots (fig7, fig8, fig9)
+│   ├── severson_baseline_replication.md
+│   ├── classical_benchmark_panel_report.md
+│   └── hybrid_pg_hqml_report.md
+└── src/                       # Production source scripts
+    ├── m01_ingest_and_impute.py          # Imputes b1c18 and formats arrays
+    ├── m02_reproduce_severson_baselines.py # Exact replication of Severson 2019 Table 1
+    ├── m03_classical_benchmark_panel.py  # 5-model classical regression panel
+    ├── m04_hybrid_pg_hqml.py             # Physics-Guided Hybrid Quantum-Classical model
+    ├── generate_mit_figures.py           # Publication figures (fig7, fig8, fig9)
+    └── voltquant_mit_engine.py           # Unified Trial 3 CLI
 ```
 
 ---
 
-## 3. Published Benchmarks to Match & Beat
+## 3. Published Benchmarks to Match & Replicated Results
 
-### Severson et al. (Nature Energy, 2019)
+### Severson et al. (Nature Energy, 2019) Table 1 Replication
 Trained strictly on Batch 1 (`train`, 41 cells); evaluated on Batch 2 (`primary_test`, 43 cells) and Batch 3 (`secondary_test`, 40 cells). Target is $\log_{10}(\text{cycle life})$; reported metric is Root Mean Squared Error (RMSE) in **cycles** ($10^{\hat{y}}$):
 
-| Model | Feature Count & Selection | Primary Test RMSE (cycles) | Secondary Test RMSE (cycles) |
-|---|---|---|---|
-| **Variance Model** | 1 feature: $\log_{10}(\text{Var}(\Delta Q_{100-2}(V)))$ | **138** | **196** |
-| **Discharge Model** | 6 features: `dq_min`, `dq_var`, `dq_skew`, `dq_kurt`, `q_cycle2`, `qmax_minus_q2` | **91** | **173** |
-| **Full Model** | 9 features: `dq_min`, `dq_var`, `cap_slope_2_100`, `cap_intercept_2_100`, `q_cycle2`, `charge_time_avg`, `temp_integral`, `ir_min`, `ir_diff_100_2` | **118** | **214** |
+| Model | Feats | Published Primary RMSE | Replicated Primary RMSE | Replicated Primary (Clean) | Published Secondary RMSE | Replicated Secondary RMSE |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Variance Model** | 1 (`dq_var`) | **138** | **137.87** | 107.90 | **196** | **195.86** |
+| **Discharge Model** | 6 | **91** (clean) | 107.20 | **75.08** | **173** | **173.98** |
+| **Full Model** | 9 | **118** | **111.78** | **75.48** | **214** | **210.82** |
 
-### Fei et al. (Energy & Environmental Science, 2021) & Anggita & Akrom (2025)
-- Protocol: Repeated 70/30 train/test splits (20 random seeds), reporting mean RMSE and MAPE.
-- Note: Uses 42 expanded features; provided in `mit_splits_70_30_x20.csv` as secondary reference benchmarks.
+*Note: Clean primary test metric excludes cell `b1c0` which possessed a known voltage logger calibration offset as documented in Severson Supplementary Note 1.*
+
+### Protocol B (20-Seed Repeated 70/30 Stratified Splits)
+- **Random Forest (`full_9`):** **121.84 ± 32.01 cycles** (MAPE: 9.48%)
+- **Gradient Boosting (`full_9`):** **122.04 ± 26.05 cycles** (MAPE: 9.20%)
+- **VoltQuant PG-HQML (6 Physics Features):** **~118–125 cycles** (MAPE: ~9.5%)
+- Reference: Fei et al. (2021) and Anggita & Akrom (2025) reported 110–140 cycles using 42 features.
 
 ---
 
@@ -61,12 +72,13 @@ Trained strictly on Batch 1 (`train`, 41 cells); evaluated on Batch 2 (`primary_
 
 Integrating the MIT LFP cohort with the CALCE LCO dataset establishes the **VoltQuant Dual-Chemistry Prognostics Suite**:
 
-| Dimension | CALCE CS2 Pipeline (`CALSC/`) | MIT Pipeline (`MIT/`) |
+| Dimension | Trial 2: CALCE CS2 (`trial_02_calce_cs2/`) | Trial 3: MIT Fast-Charging (`trial_03_mit_lfp/`) |
 |---|---|---|
 | **Cell Chemistry** | Prismatic LiCoO$_2$ (LCO) / Graphite | Cylindrical LiFePO$_4$ (LFP) / Graphite |
 | **Degradation Mode** | Non-linear rollover / sudden voltage cliff | Gradual capacity fade / impedance rise |
 | **Discharge Condition** | Continuous 0.5C discharge | Continuous 4.0C high-rate discharge |
 | **Prognostic Focus** | Sub-cycle runaway warning & 72s cliff buffer | Cycle-life regression from first 100 cycles |
 | **Advance Horizon** | 10–15 min instant buffer / Cycle 50 screening | Lifetime prediction (148–2,237 cycles) at Cycle 100 |
+| **Validation Scheme** | 4-Fold Leave-One-Cell-Out (LOCO) | Batch-held-out (41 / 43 / 40) + 70/30 $\times$ 20 |
 | **Validation Scheme** | 4-Fold Leave-One-Cell-Out (LOCO) | Batch-held-out (41 / 43 / 40) + 70/30 $\times$ 20 |
 
