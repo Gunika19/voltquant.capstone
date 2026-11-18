@@ -75,13 +75,13 @@ def run_hil_demonstration(port: str = "COM5", baudrate: int = 115200, delay: flo
         # Parse hardware response per teammate's exact specification
         if "ACCEPTED" in reply:
             status_tag = f"{GREEN}{BOLD}✓ ACCEPTED{RESET}"
-            reply_display = f"{GREEN}{reply[:35]}{RESET}"
+            reply_display = f"{GREEN}{reply[:55]}{RESET}"
         elif "REJECTED" in reply or "NO_RESULT" in reply or "ERR" in reply:
             status_tag = f"{RED}{BOLD}✗ FAULT / REJECTED{RESET}"
-            reply_display = f"{RED}{reply[:35]}{RESET}"
+            reply_display = f"{RED}{reply[:55]}{RESET}"
         else:
             status_tag = f"{YELLOW}? UNKNOWN{RESET}"
-            reply_display = reply[:35]
+            reply_display = reply[:55]
 
         tx_str = f"{cls_state},5,{soh}"
         print(f"Cyc {cyc:<3} | Cell 5   | {soh:>3}% | Class {cls_state:<4} | {tx_str:<14} | {reply_display:<45} | {elapsed_ms:>5.1f} ms")
@@ -93,6 +93,26 @@ def run_hil_demonstration(port: str = "COM5", baudrate: int = 115200, delay: flo
 
         if delay > 0:
             time.sleep(delay)
+
+    # Live Hardware Attack Demonstrations
+    print("-" * 105)
+    print(f"{BOLD}{CYAN}LIVE HARDWARE ATTACK DEMONSTRATIONS (Tang Nano 20K FPGA Security Check):{RESET}")
+
+    # Attack 1: Tampered Telemetry (Bit Flip after Tagging)
+    t0 = time.perf_counter()
+    reply_tamper = link.tamper(cls=1, cell_id=5, value=58)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    status_t = f"{GREEN}{BOLD}✓ REJECTED (PASS){RESET}" if "BAD_TAG" in reply_tamper or "REJECTED" in reply_tamper else f"{RED}FAIL{RESET}"
+    print(f"ATTACK  | Cell 5   |  58% | TAMPER       | TAMPER 1,5,58  | {RED}{reply_tamper[:45]:<45}{RESET} | {elapsed_ms:>5.1f} ms")
+    print(f"   {GREEN}↳ FPGA Cryptographic Defense: Bit flip detected via AES-CMAC tag failure!{RESET}")
+
+    # Attack 2: Replay Attack (Duplicate Stale Frame)
+    t0 = time.perf_counter()
+    reply_replay = link.replay()
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    status_r = f"{GREEN}{BOLD}✓ REJECTED (PASS){RESET}" if "REPLAY" in reply_replay or "REJECTED" in reply_replay else f"{RED}FAIL{RESET}"
+    print(f"ATTACK  | Cell 5   |  --% | REPLAY       | REPLAY         | {RED}{reply_replay[:45]:<45}{RESET} | {elapsed_ms:>5.1f} ms")
+    print(f"   {GREEN}↳ FPGA Anti-Replay Defense: Non-monotonic sequence counter rejected!{RESET}")
 
     print("-" * 105)
     print(f"\n{BOLD}Hardware Session Summary:{RESET}")

@@ -103,6 +103,11 @@ class VoltQuantLink:
         self._last_mock_packet: Optional[str] = None
 
         if not self.is_mock and HAS_PYSERIAL:
+            available = self.list_available_ports()
+            if available and (self.port_name not in available or self.port_name == "auto"):
+                logger.info(f"Port '{self.port_name}' not in {available}. Auto-selecting detected port '{available[0]}'.")
+                self.port_name = available[0]
+
             try:
                 logger.info(f"Connecting to ESP32 on {self.port_name} at {self.baudrate} baud...")
                 self.serial_conn = serial.Serial(

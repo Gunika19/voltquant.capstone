@@ -93,7 +93,19 @@ Each cycle prediction is transmitted as a single ASCII line terminated with `\n`
 
 ## 4. Hardware Wiring & Pinout Guide
 
-### Wiring ESP32 to Tang Nano 20K FPGA (SPI Mode 0, 1 MHz)
+### Tang Nano 20K On-board Physical LED Status Indicators
+The Tang Nano 20K FPGA acts as the physical visual hardware annunciator using its 6 onboard surface-mount LEDs (`LED0` through `LED5`):
+
+| LED | FPGA Pin | Signal State | Physical LED Behavior | What It Demonstrates |
+| :--- | :--- | :--- | :--- | :--- |
+| **LED0** | **Pin 15** | `NORMAL` | **Steady ON** | Battery is healthy ($SOH \ge 80\%$, Class SAFE). |
+| **LED1** | **Pin 16** | `WARNING` | **Blinks at 1 Hz** (Slow pulse) | Degradation knee reached ($70\% \le SOH < 80\%$, Class WARNING). |
+| **LED2** | **Pin 17** | `DEGRADED` | **Strobes at 4 Hz** (Rapid flash) | Critical rollover precursor active ($SOH < 70\%$). **10-minute advance warning before 72s voltage collapse!** |
+| **LED3** | **Pin 18** | `BAD_TAG` | **Solid ON for 1.5 seconds** | Telemetry tampering detected! AES-CMAC tag failed hardware validation. |
+| **LED4** | **Pin 19** | `REPLAY` | **Solid ON for 1.5 seconds** | Replay attack detected! Sequence number was non-monotonic or repeated. |
+| **LED5** | **Pin 20** | `ACCEPTED` | **Flashes for 1.0 second** | Frame acknowledged! Pulses on every valid verified frame received. |
+
+### Wiring ESP32 Dev Board to Tang Nano 20K FPGA (SPI Mode 0, 1 MHz)
 | ESP32 Pin | FPGA Pin | Signal | Description |
 | :--- | :--- | :--- | :--- |
 | **GPIO 18** | **Pin 27** | `SCK` | SPI Clock (1 MHz, Mode 0) |
