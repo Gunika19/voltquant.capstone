@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VoltQuant Capstone Executive Dashboard</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased p-6 m-0 font-sans min-h-screen">
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Header Section -->
+    <header class="p-6 rounded-xl border border-slate-800 bg-slate-900 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-600 text-white">VoltQuant 2026</span>
+          <span class="text-xs text-slate-400">CALCE CS2 High-Assurance Battery Prognostics</span>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight mt-1 text-white">Dual-Horizon Physics-Guided Hybrid Quantum Battery Prognostics</h1>
+        <p class="text-xs text-slate-400 mt-0.5">Authors: VoltQuant Engineering Group | Capstone Team Knowledge Transfer & Slide Master</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          78.14% LOCO Recall (0/4 Collapsed Folds)
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          10-15 Min Advance Buffer
+        </span>
+      </div>
+    </header>
+
+    <!-- Key Metrics Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-4 rounded-xl border border-slate-800 bg-slate-900">
+        <span class="text-xs text-slate-400 block">LOCO Warning Recall</span>
+        <div class="text-2xl font-bold text-emerald-400 mt-1">78.14%</div>
+        <span class="text-[11px] text-slate-400 mt-0.5 block">vs. Classical 60.2% | VQC 32.1%</span>
+      </div>
+      <div class="p-4 rounded-xl border border-slate-800 bg-slate-900">
+        <span class="text-xs text-slate-400 block">Runaway Advance Buffer</span>
+        <div class="text-2xl font-bold text-indigo-400 mt-1">10.0 - 15.0 min</div>
+        <span class="text-[11px] text-slate-400 mt-0.5 block">Exceeds GB 38031 (5 min) by 2-3x</span>
+      </div>
+      <div class="p-4 rounded-xl border border-slate-800 bg-slate-900">
+        <span class="text-xs text-slate-400 block">Cycle 50 Lifetime Lead Time</span>
+        <div class="text-2xl font-bold text-sky-400 mt-1">27,092 min</div>
+        <span class="text-[11px] text-slate-400 mt-0.5 block">451.5 Hours (~20,300 km) notice</span>
+      </div>
+      <div class="p-4 rounded-xl border border-slate-800 bg-slate-900">
+        <span class="text-xs text-slate-400 block">Healthy False Alarm Rate</span>
+        <div class="text-2xl font-bold text-purple-400 mt-1">0.00%</div>
+        <span class="text-[11px] text-slate-400 mt-0.5 block">Zero false alerts across 841 cycles</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex border-b border-slate-800 gap-2 text-xs font-medium">
+      <button onclick="switchTab('tab-problem')" id="btn-problem" class="tab-btn px-4 py-2.5 border-b-2 border-indigo-500 text-indigo-400 font-semibold">1. Problem & NASA Pivot</button>
+      <button onclick="switchTab('tab-architecture')" id="btn-architecture" class="tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">2. PG-HQML Architecture</button>
+      <button onclick="switchTab('tab-results')" id="btn-results" class="tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">3. Benchmark Results</button>
+      <button onclick="switchTab('tab-literature')" id="btn-literature" class="tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">4. Literature (2023-2025)</button>
+      <button onclick="switchTab('tab-demo')" id="btn-demo" class="tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">5. Live Demo Commands</button>
+    </div>
+
+    <!-- Tab 1: Problem & NASA Pivot -->
+    <div id="tab-problem" class="tab-content space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-5 rounded-xl border border-slate-800 bg-slate-900 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-bold text-xs">CRITICAL FLAW</span>
+            <h3 class="font-bold text-sm text-white">The 72-Second Runaway Cliff Paradox</h3>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            In degraded battery cells, the discharge curve stays stable until ~45 minutes, then accelerates. 
+            Once voltage drops past <strong class="text-white">3.00 V</strong>, the collapse to the 
+            <strong class="text-white">2.75 V cutoff takes only 62 to 89 seconds</strong> (mean: 72 seconds).
+          </p>
+          <div class="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300">
+            <strong>Why Standard BMS Fails:</strong> Reactive alarms triggering at 3.0V give under 90 seconds to escape. Passengers are trapped before thermal runaway intervention is possible.
+          </div>
+          <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
+            <strong>The VoltQuant Solution:</strong> Fires advance alerts at minute 34.0 (15 min buffer) and minute 39.0 (10 min buffer) when cell voltage is still nominal (3.51V - 3.54V).
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl border border-slate-800 bg-slate-900 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-bold text-xs">SCIENTIFIC PIVOT</span>
+            <h3 class="font-bold text-sm text-white">Why We Dropped NASA PCoE for CALCE</h3>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Many academic papers claim &gt;95% accuracy on NASA PCoE. Our audit proved this is an artifact of data leakage:
+          </p>
+          <ul class="text-xs space-y-1.5 text-slate-300 list-disc pl-4">
+            <li><strong>Batch Leakage:</strong> Different batteries were tested at different temperatures (4°C, 24°C, 44°C). Random 80/20 splits allowed models to memorize battery serial IDs.</li>
+            <li><strong>100% LOCO Failure:</strong> On unseen batteries, every model collapsed to <strong class="text-rose-400">0.00% recall</strong> on NASA.</li>
+            <li><strong>Short Lifespans:</strong> NASA cells died in 132-168 cycles; CALCE cells undergo <strong class="text-white">900+ cycles</strong> under continuous 0.5C discharge, enabling true early prediction.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Architecture -->
+    <div id="tab-architecture" class="tab-content hidden space-y-4">
+      <div class="p-5 rounded-xl border border-slate-800 bg-slate-900 space-y-4">
+        <h3 class="font-bold text-sm text-white">Physics-Guided Hybrid Quantum-Classical Network (PG-HQML)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3.5 rounded-lg border border-slate-800 bg-slate-950">
+            <strong class="text-indigo-400 block mb-1">1. Classical Pre-Encoder</strong>
+            Takes 74 physics-guided features (ohmic drop, dynamic resistance, plateau slope, curvature) and projects them into 8 latent angles in [0, &pi;].
+          </div>
+          <div class="p-3.5 rounded-lg border border-slate-800 bg-slate-950">
+            <strong class="text-emerald-400 block mb-1">2. 8-Qubit Variational Circuit</strong>
+            Native PennyLane TorchLayer with R_Y angle embeddings and 2 StronglyEntanglingLayers in a circular CNOT entanglement ring. Measures Pauli-Z expectation values.
+          </div>
+          <div class="p-3.5 rounded-lg border border-slate-800 bg-slate-950">
+            <strong class="text-amber-400 block mb-1">3. Focal Loss & Calibrated Stacking</strong>
+            Multi-class Focal Loss (&gamma;=2.0) combined with a calibrated ensemble: 40% XGBoost + 30% LightGBM + 15% ExtraTrees + 15% HQNN.
+          </div>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-400">
+          // Circuit Ansatz: L=2 StronglyEntanglingLayers on 8 Qubits<br>
+          |0&gt; -- [RY(&theta;_0)] -- [Rot(w_0)] -- * -- [Rot] -- &lt;Z_0&gt; &isin; [-1, 1]<br>
+          |0&gt; -- [RY(&theta;_1)] -- [Rot(w_1)] -- X -- [Rot] -- &lt;Z_1&gt; &isin; [-1, 1]<br>
+          ...<br>
+          |0&gt; -- [RY(&theta;_7)] -- [Rot(w_7)] -- * -- [Rot] -- &lt;Z_7&gt; &isin; [-1, 1]
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Benchmark Results -->
+    <div id="tab-results" class="tab-content hidden space-y-4">
+      <div class="p-5 rounded-xl border border-slate-800 bg-slate-900 space-y-3">
+        <h3 class="font-bold text-sm text-white">Leave-One-Cell-Out (LOCO) Model Comparison</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2.5">Model Architecture</th>
+                <th class="py-2.5">Model Family</th>
+                <th class="py-2.5">LOCO Warning Recall</th>
+                <th class="py-2.5">Balanced Accuracy</th>
+                <th class="py-2.5">Macro F1</th>
+                <th class="py-2.5">Zero-Recall Folds</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 text-slate-300">
+              <tr class="opacity-60">
+                <td class="py-2.5 font-mono text-slate-400">NASA Classical / VQC</td>
+                <td>NASA Baseline</td>
+                <td class="text-rose-400 font-bold">0.00%</td>
+                <td>33.33%</td>
+                <td>28.14%</td>
+                <td class="text-rose-400">4 / 4 (Total Collapse)</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-mono">CALCE Logistic Regression</td>
+                <td>Linear</td>
+                <td>18.42%</td>
+                <td>54.12%</td>
+                <td>48.91%</td>
+                <td>2 / 4 Folds</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-mono">CALCE ExtraTrees</td>
+                <td>Tree Ensemble</td>
+                <td>51.24%</td>
+                <td>76.45%</td>
+                <td>74.10%</td>
+                <td>0 / 4 Folds</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-mono">CALCE Random Forest</td>
+                <td>Tree Ensemble</td>
+                <td>54.31%</td>
+                <td>78.12%</td>
+                <td>76.34%</td>
+                <td>0 / 4 Folds</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-mono">CALCE LightGBM</td>
+                <td>Gradient Boosting</td>
+                <td>58.92%</td>
+                <td>80.41%</td>
+                <td>78.92%</td>
+                <td>0 / 4 Folds</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-mono">CALCE XGBoost (K07)</td>
+                <td>Gradient Boosting</td>
+                <td>60.23%</td>
+                <td>81.74%</td>
+                <td>79.56%</td>
+                <td>0 / 4 Folds</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-mono">CALCE Standalone VQC (K08)</td>
+                <td>Pure Quantum</td>
+                <td>32.14%</td>
+                <td>58.10%</td>
+                <td>54.12%</td>
+                <td class="text-amber-400">1 / 4 Folds (Barren Plateau)</td>
+              </tr>
+              <tr class="bg-emerald-500/10 font-semibold text-emerald-300">
+                <td class="py-2.5 font-mono text-emerald-400">VoltQuant PG-HQML (K13)</td>
+                <td>Physics-Guided Hybrid</td>
+                <td class="text-emerald-400 font-bold text-sm">78.14%</td>
+                <td class="font-bold">86.63%</td>
+                <td class="font-bold">83.28%</td>
+                <td class="font-bold text-emerald-400">0 / 4 Folds (Robust)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Literature Matrix -->
+    <div id="tab-literature" class="tab-content hidden space-y-4">
+      <div class="p-5 rounded-xl border border-slate-800 bg-slate-900 space-y-3">
+        <h3 class="font-bold text-sm text-white">Peer-Reviewed Literature Matrix (2023-2025) vs. VoltQuant</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2.5">Reference</th>
+                <th class="py-2.5">Venue</th>
+                <th class="py-2.5">Validation</th>
+                <th class="py-2.5">Lead Time</th>
+                <th class="py-2.5">False Alarm Rate</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 text-slate-300">
+              <tr>
+                <td class="py-2.5 font-medium">Zhang et al. (2023)</td>
+                <td>Applied Energy</td>
+                <td>Pooled 80/20</td>
+                <td>None (Continuous SOH)</td>
+                <td>Not Evaluated</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-medium">Wang et al. (2023)</td>
+                <td>IEEE TTE</td>
+                <td>Leave-Group-Out</td>
+                <td>30-50 cycles (~35 hrs)</td>
+                <td class="text-rose-400 font-medium">8.5% False Alarms</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-medium">Liu et al. (2024)</td>
+                <td>J. Energy Storage</td>
+                <td>Strict LOCO</td>
+                <td>MAE: 42.5 cyc (at Cyc 100)</td>
+                <td>N/A (Regression)</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-medium">Fermín-Cuaza (2024)</td>
+                <td>Energy</td>
+                <td>LOCO / K-Fold</td>
+                <td>Knee onset (100-250 cyc)</td>
+                <td>Post-heuristic</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-medium">Li et al. (2024)</td>
+                <td>IEEE TIM</td>
+                <td>Grouped CV</td>
+                <td>Within-cycle (&ge; 35% DOD)</td>
+                <td>N/A (Regression)</td>
+              </tr>
+              <tr class="bg-indigo-500/10 font-semibold text-indigo-300">
+                <td class="py-2.5 text-indigo-400">VoltQuant (Ours, 2026)</td>
+                <td>Capstone Engine</td>
+                <td>Strict Out-of-Dist. LOCO</td>
+                <td>Cycle 50: 27,092m | Buffer: 10-15m</td>
+                <td class="text-emerald-400 font-bold">0.00% (K=3 Filter)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 5: Live Demo Commands -->
+    <div id="tab-demo" class="tab-content hidden space-y-4">
+      <div class="p-5 rounded-xl border border-slate-800 bg-slate-900 space-y-3">
+        <h3 class="font-bold text-sm text-white">Commands for Live Capstone Committee Demonstration</h3>
+        <p class="text-xs text-slate-400">Run these from PowerShell in the workspace root on Python 3.13:</p>
+        <div class="space-y-2">
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-1">1. Run the instant 10-15 min runaway buffer analysis:</span>
+            <code class="text-xs font-mono text-indigo-400 select-all">python CALSC/src/voltquant_engine.py runaway</code>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-1">2. Stream real-time discharge cycle monitoring (Shows Green &rarr; Amber &rarr; Red & alerts):</span>
+            <code class="text-xs font-mono text-indigo-400 select-all">python CALSC/src/voltquant_engine.py stream --cell CS2_35 --cycle 700</code>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-1">3. Ultra-Early Screening at Cycle 50 (5.6% lifespan &rarr; 27,092 min lead time):</span>
+            <code class="text-xs font-mono text-indigo-400 select-all">python CALSC/src/voltquant_engine.py screen --cell CS2_35 --cycle 50</code>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-1">4. Display the peer-reviewed literature benchmark matrix:</span>
+            <code class="text-xs font-mono text-indigo-400 select-all">python CALSC/src/voltquant_engine.py literature</code>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+            <span class="text-[11px] text-slate-400 block mb-1">5. Execute full LOCO evaluation:</span>
+            <code class="text-xs font-mono text-indigo-400 select-all">python CALSC/src/voltquant_engine.py evaluate</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-500', 'text-indigo-400', 'font-semibold');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + tabId.replace('tab-', ''));
+      activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      activeBtn.classList.add('border-indigo-500', 'text-indigo-400', 'font-semibold');
+    }
+  </script>
+</body>
+</html>
+

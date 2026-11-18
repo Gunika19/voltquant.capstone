@@ -61,7 +61,7 @@ voltquant.capstone/
 
 ### Installation
 ```bash
-git clone https://github.com/Gunika19/voltquant.capstone.git
+git clone https://github.com/VoltQuant Team19/voltquant.capstone.git
 cd voltquant.capstone
 pip install torch pennylane xgboost lightgbm scikit-learn pandas numpy matplotlib cryptography
 ```
