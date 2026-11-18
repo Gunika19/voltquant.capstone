@@ -1,48 +1,43 @@
 .DS_Store
 ._*
 .venv*/
-data/
-!data/CHECKSUMS.sha256
-models/
-reports/figures/
 __pycache__/
 *.pyc
 *.egg-info/
+.pytest_cache/
+.ruff_cache/
 .claude/settings.local.json
-
-# Allow finalized documentation and reports in docs/
-!docs/*.md
-!docs/*.docx
-!docs/*.html
-!docs/figures/*.png
-
-# Exclude raw data files and binary caches
-trial_02_calce_cs2/data/*.zip
-trial_02_calce_cs2/data/*.parquet
-trial_02_calce_cs2/data/*.npz
-trial_02_calce_cs2/data/01_raw/
-trial_02_calce_cs2/data/02_intermediate/
-trial_02_calce_cs2/data/03_features/
-trial_02_calce_cs2/data/04_model_input/
-!trial_02_calce_cs2/data/README.md
-
-# Allow trial_02 publication figures to be tracked
-!trial_02_calce_cs2/reports/figures/*.png
-
-# Exclude trial_03 raw data files
-trial_03_mit_lfp/data/*.csv
-trial_03_mit_lfp/data/*.parquet
-trial_03_mit_lfp/data/*.mat
-!trial_03_mit_lfp/data/README.md
-!trial_03_mit_lfp/data/FEATURES.md
-
-# Allow trial_03 publication figures to be tracked
-!trial_03_mit_lfp/reports/figures/*.png
-
-# Local tooling & scratch
 .vscode/
 scratch/
 *.tmp
 *.log
 mpl_voltquant/
+models/
 
+# Root Data directory (legacy raw files)
+/data/
+!/data/CHECKSUMS.sha256
+
+# Trial 1 & 2 raw data directories
+trial_01_nasa_pcoe/**/data/
+trial_02_calce_cs2/data/*
+!trial_02_calce_cs2/data/README.md
+
+# Trial 3 raw files (>10MB)
+trial_03_mit_lfp/data/*.mat
+trial_03_mit_lfp/data/*raw*
+
+# Allow Trial 3 lightweight cohort data (<100KB)
+!trial_03_mit_lfp/data/mit_cycle_life_clean.csv
+!trial_03_mit_lfp/data/mit_cycle_life_processed.parquet
+!trial_03_mit_lfp/data/mit_splits_70_30_x20.csv
+!trial_03_mit_lfp/data/FEATURES.md
+!trial_03_mit_lfp/data/README.md
+
+# Allow documentation & publication figures
+!docs/*.md
+!docs/*.docx
+!docs/*.html
+!docs/figures/*.png
+!trial_02_calce_cs2/reports/figures/*.png
+!trial_03_mit_lfp/reports/figures/*.png
