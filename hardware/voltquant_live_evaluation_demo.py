@@ -17,6 +17,7 @@ Acts:
 from __future__ import annotations
 import sys
 import time
+from datetime import datetime
 import argparse
 from pathlib import Path
 
@@ -37,6 +38,11 @@ RESET = "\033[0m"
 CLASS_NAMES = {0: "NORMAL", 1: "WARNING", 2: "DEGRADED"}
 
 
+def get_ts() -> str:
+    """Return high-precision millisecond timestamp string [HH:MM:SS.mmm]."""
+    return datetime.now().strftime("[%H:%M:%S.%f")[:-3] + "]"
+
+
 def parse_verdict_badge(reply: str) -> str:
     """Format verdict into clean, high-impact terminal string."""
     if "ACCEPTED" in reply:
@@ -52,16 +58,17 @@ def parse_verdict_badge(reply: str) -> str:
 
 
 def run_live_evaluation(port: str = "COM3", step_delay: float = 1.0):
-    print("=" * 80)
+    start_ts = get_ts()
+    print("=" * 95)
     print(f"{CYAN}{BOLD}⚡ VOLTQUANT CAPSTONE HARDWARE EVALUATION DEMO{RESET}")
-    print(f"Connecting to ESP32 on {port} (Baud: 115200)...")
-    print("=" * 80)
+    print(f"Target Port : {port} (Baud: 115200) | Session Start: {start_ts}")
+    print(f"Active Script: hardware/voltquant_live_evaluation_demo.py")
+    print("=" * 95)
 
     link = VoltQuantLink(port=port, baudrate=115200)
 
     # ─── Act 1: Real model predictions (10 cells) ───
     print(f"\n{BOLD}━━━ REAL MODEL PREDICTIONS ━━━{RESET}")
-    # Sourced from VoltQuant model evaluation / test data
     predictions = [
         (0, 1, 95.2),   # cell 1 normal
         (0, 2, 93.1),   # cell 2 normal
@@ -77,37 +84,47 @@ def run_live_evaluation(port: str = "COM3", step_delay: float = 1.0):
 
     for cls, cell, soh in predictions:
         c_name = CLASS_NAMES.get(cls, str(cls))
+        t_before = time.perf_counter()
         reply = link.send(cls, cell, soh)
+        latency_ms = (time.perf_counter() - t_before) * 1000.0
         badge = parse_verdict_badge(reply)
-        print(f"TX cell={cell:<2}  class={c_name:<8}  soh={soh:>5.2f}%  {badge}")
+        ts = get_ts()
+        print(f"{ts} TX cell={cell:<2}  class={c_name:<8}  soh={soh:>5.2f}%  {badge}  ({latency_ms:>4.1f} ms)")
         time.sleep(step_delay)  # pause so panel can see LEDs change on FPGA
 
     # ─── Act 2: Attacker tries to tamper ───
     print(f"\n{BOLD}━━━ SIMULATED ATTACK: TAMPER ━━━{RESET}")
-    print("Attacker intercepts and changes 'degraded' to 'normal'...")
+    print(f"{get_ts()} Attacker intercepts and changes 'degraded' to 'normal'...")
+    t_before = time.perf_counter()
     reply_tamper = link.tamper(0, 10, 58.7)   # tries to fake cell 10 as normal
+    lat_tamper = (time.perf_counter() - t_before) * 1000.0
     badge_t = parse_verdict_badge(reply_tamper)
-    print(f"TX cell=10 class=NORMAL [TAMPERED]     {badge_t}")
+    print(f"{get_ts()} TX cell=10 class=NORMAL [TAMPERED]     {badge_t}  ({lat_tamper:>4.1f} ms)")
     print(f"   {YELLOW}↳ Panel sees: LED3 turns ON for 1.5s; LED2 keeps blinking (still degraded!){RESET}")
     time.sleep(2.0)
 
     # ─── Act 3: Attacker tries to replay ───
     print(f"\n{BOLD}━━━ SIMULATED ATTACK: REPLAY ━━━{RESET}")
-    print("Attacker replays an old 'normal' frame...")
+    print(f"{get_ts()} Attacker replays an old 'normal' frame...")
+    t_before = time.perf_counter()
     reply_replay = link.replay()
+    lat_replay = (time.perf_counter() - t_before) * 1000.0
     badge_r = parse_verdict_badge(reply_replay)
-    print(f"TX [REPLAY]                            {badge_r}")
+    print(f"{get_ts()} TX [REPLAY]                            {badge_r}  ({lat_replay:>4.1f} ms)")
     print(f"   {YELLOW}↳ Panel sees: LED4 turns ON for 1.5s; LED2 keeps blinking (still degraded!){RESET}")
     time.sleep(2.0)
 
     # ─── Act 4: System recovers with next real prediction ───
     print(f"\n{BOLD}━━━ SYSTEM RECOVERY ━━━{RESET}")
+    t_before = time.perf_counter()
     reply_recover = link.send(0, 10, 90.5)     # cell 10 recovered, normal now
+    lat_rec = (time.perf_counter() - t_before) * 1000.0
     badge_rec = parse_verdict_badge(reply_recover)
-    print(f"TX cell=10 class=NORMAL    soh=90.50%  {badge_rec}")
+    print(f"{get_ts()} TX cell=10 class=NORMAL    soh=90.50%  {badge_rec}  ({lat_rec:>4.1f} ms)")
     print(f"   {GREEN}↳ Panel sees: LED0 steady ON (Battery normal state restored){RESET}")
 
-    print(f"\n{BOLD}{CYAN}━━━ DEMO COMPLETE ━━━{RESET}\n")
+    end_ts = get_ts()
+    print(f"\n{BOLD}{CYAN}━━━ DEMO COMPLETE at {end_ts} ━━━{RESET}\n")
     link.close()
 
 
