@@ -14,24 +14,27 @@ This directory contains the firmware, communication protocols, and Python interf
 |  - vq_send.py (VoltQuantLink)      |
 +------------------------------------+
                   |
-                  | USB-UART Serial (115200 Baud, e.g. COM5)
+                  | USB Serial (115200 Baud, e.g. COM5)
                   v
 +------------------------------------+
-|     ESP32 Gateway Controller       |
-|  - Firmware: voltquant_bridge.ino  |
-|  - ASCII packet parsing & bounds   |
+|      ESP32 Dev Module Gateway      |
+|  - Firmware: voltquant_esp32.ino   |
+|  - AES-CMAC-128 Tag Generation     |
+|  - NIST Test Key (128-bit)         |
 +------------------------------------+
                   |
-                  | Hardware UART2 (TX=17, RX=16, 115200 Baud)
+                  | SPI Mode 0 (1 MHz)
+                  | SCK=18, MOSI=23, MISO=19, CS=5
                   v
 +------------------------------------+
-|  FPGA Hardware Verification Engine |
-|  - Cryptographic / telemetry check |
-|  - Monotonicity bounds validation  |
+|     Tang Nano 20K FPGA Engine      |
+|  - Hardware AES-CMAC Verification  |
+|  - Strict Monotonic Sequence Check |
+|  - Bounds & Electrochemical Checks |
 |  - Returns: ACCEPTED / REJECTED    |
 +------------------------------------+
                   |
-                  | Serial UART or Local LAN / Wi-Fi Bridge
+                  | Hardware Serial or Wi-Fi / LAN Bridge
                   v
 +------------------------------------+
 |             LAPTOP 2               |
@@ -39,7 +42,7 @@ This directory contains the firmware, communication protocols, and Python interf
 |  - Receiver: voltquant_receiver.py |
 |  - Web UI: http://localhost:5000   |
 |  - 10-Min Advance Warning Buffer   |
-|  - SOH Gauge & FPGA Audit Badge    |
+|  - Live Attack Detection Badges    |
 +------------------------------------+
 ```
 
@@ -90,14 +93,47 @@ Each cycle prediction is transmitted as a single ASCII line terminated with `\n`
 
 ## 4. Hardware Wiring & Pinout Guide
 
-### Wiring ESP32 to FPGA
-| ESP32 Pin | FPGA Pin | Description |
-| :--- | :--- | :--- |
-| **GPIO 17 (TX2)** | RX Pin | ESP32 transmits formatted packet to FPGA |
-| **GPIO 16 (RX2)** | TX Pin | ESP32 receives verification reply from FPGA |
-| **GND** | GND | Common ground reference (**Mandatory**) |
-| **GPIO 2** | Built-in LED | Blinks Blue on `ACCEPTED` packet |
-| **GPIO 4** | External Red LED | Blinks Red on `REJECTED` or fault |
+### Wiring ESP32 to Tang Nano 20K FPGA (SPI Mode 0, 1 MHz)
+| ESP32 Pin | FPGA Pin | Signal | Description |
+| :--- | :--- | :--- | :--- |
+| **GPIO 18** | **Pin 27** | `SCK` | SPI Clock (1 MHz, Mode 0) |
+| **GPIO 23** | **Pin 28** | `MOSI` | Master Out Slave In (ESP32 $\to$ FPGA 34-byte transaction) |
+| **GPIO 19** | **Pin 26** | `MISO` | Master In Slave Out (FPGA verdict & status byte returned) |
+| **GPIO 5** | **Pin 25** | `CS` | Chip Select (Active LOW) |
+| **GND** | **GND** | `GND` | Common Ground Reference (**Mandatory**) |
+
+---
+
+## 5. Live Demonstration & Attack Scenarios
+
+### 1. Nominal Prediction & Early Warning
+* **Laptop 1 Command:**
+  ```python
+  reply = link.send(1, 5, 58)  # Class 1 (Warning), Cell 5, 58% SOH
+  ```
+* **ESP32 Action:** Computes 128-bit AES-CMAC tag over the 16-byte frame, sends 34 bytes via SPI to Tang Nano 20K.
+* **FPGA Verdict:** Returns `ACCEPTED`.
+* **Laptop 2 Dashboard:** Displays real-time 58% SOH and triggers the **10.0-minute advance egress warning** before voltage collapse.
+
+### 2. Tamper / Bad Tag Attack Demonstration
+* **Laptop 1 Command:**
+  ```python
+  reply = link.tamper(1, 5, 58)
+  ```
+* **ESP32 Action:** Generates valid AES-CMAC tag, then flips 1 bit in the payload buffer before SPI transfer.
+* **FPGA Verdict:** Hardware AES-CMAC validator detects bit flip and returns:
+  `RX status=0x04 REJECTED reason=BAD_TAG trusted_class=SAFE`
+* **Evaluator Value:** Proves in real time that battery telemetry cannot be spoofed or corrupted in flight.
+
+### 3. Replay Attack Demonstration
+* **Laptop 1 Command:**
+  ```python
+  reply = link.replay()
+  ```
+* **ESP32 Action:** Re-transmits the previous 34-byte transaction without bumping the sequence counter.
+* **FPGA Verdict:** Sequence monotonicity checker detects non-increasing `seq` and returns:
+  `RX status=0x02 REJECTED reason=REPLAY trusted_class=SAFE`
+* **Evaluator Value:** Proves resilience against replay attacks and stale telemetry injection.
 
 ### Wiring Laptop 1 and Laptop 2
 * **Laptop 1**: Connects to the **ESP32 Micro-USB / Type-C port** (enumerates as a COM port, e.g., `COM5` on Windows or `/dev/ttyUSB0` on Linux).
